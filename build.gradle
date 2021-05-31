@@ -1,4 +1,4 @@
-plugins {
+ plugins {
     id 'java'
 }
 
@@ -8,6 +8,12 @@ version '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
 }
+
+ jar {
+     manifest {
+         attributes 'Main-Class': 'ssd.assignment.DecentAuction'
+     }
+ }
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
