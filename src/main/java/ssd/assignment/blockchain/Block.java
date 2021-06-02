@@ -34,11 +34,11 @@ public class Block{
 
     public String mineBlock() {
         String prefix = new String(new char[this.difficulty]).replace('\0', '0');
+        this.timestamp = System.currentTimeMillis();
         while(!hash.substring(0, this.difficulty).equals(prefix)) {
             nonce++;
             hash = crypto.sha256(this.toString());
         }
-        this.timestamp = System.currentTimeMillis();
         return hash;
     }
 
