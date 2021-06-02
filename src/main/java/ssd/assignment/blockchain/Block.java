@@ -86,7 +86,7 @@ public class Block{
 
         private int index;
         private long timestamp;
-        private int difficulty;
+        private final int difficulty;
         private int nonce = 0;
         private String hash;
         private String parentHash;
