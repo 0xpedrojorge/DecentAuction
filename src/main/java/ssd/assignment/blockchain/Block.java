@@ -8,7 +8,7 @@ public class Block{
 
     private static final Crypto crypto = new Crypto();
 
-    private BlockHeader header;
+    private final BlockHeader header;
     private String transactions;
 
     public Block() {
@@ -26,17 +26,17 @@ public class Block{
         this.header.timestamp = System.currentTimeMillis();
         while(!this.header.hash.substring(0, this.header.difficulty).equals(prefix)) {
             this.header.nonce ++;
-            this.header.hash = crypto.sha256(this.toString());
+            this.header.hash = crypto.hash(this.toString());
         }
         return this.header.hash;
     }
 
     public int getIndex() {
-        return this.header.index;
+        return this.header.id;
     }
 
     public void setIndex(int index) {
-        this.header.index = index;
+        this.header.id = index;
     }
 
     public long getTimestamp() {
@@ -84,7 +84,7 @@ public class Block{
 
     public static class BlockHeader {
 
-        private int index;
+        private int id;
         private long timestamp;
         private final int difficulty;
         private int nonce = 0;
@@ -92,21 +92,21 @@ public class Block{
         private String parentHash;
 
         public BlockHeader() {
-            this.index = 0;
+            this.id = 0;
             this.difficulty = MINING_DIFFICULTY;
             this.parentHash = "0";
-            this.hash = crypto.sha256(this.toString());
+            this.hash = crypto.hash(this.toString());
         }
 
-        public BlockHeader(int index, String parentHash) {
-            this.index = index;
+        public BlockHeader(int id, String parentHash) {
+            this.id = id;
             this.difficulty = MINING_DIFFICULTY;
             this.parentHash = parentHash;
-            this.hash = crypto.sha256(this.toString());
+            this.hash = crypto.hash(this.toString());
         }
 
         public String toString() {
-            return this.index + this.timestamp + this.difficulty + this.nonce + this.parentHash;
+            return this.id + this.timestamp + this.difficulty + this.nonce + this.parentHash;
         }
 
     }

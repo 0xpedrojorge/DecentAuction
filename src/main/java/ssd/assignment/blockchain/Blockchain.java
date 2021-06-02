@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Blockchain {
 
-    public List<Block> chain = new ArrayList<Block>();
+    public List<Block> chain = new ArrayList<>();
 
     public Blockchain() {
         this.append(new Block());
@@ -17,6 +17,10 @@ public class Blockchain {
 
     public Block getRootBlock() {
         return this.chain.get(0);
+    }
+
+    public Block getLastBlock() {
+        return this.chain.get(this.chain.size()-1);
     }
 
     public void append(Block block) {

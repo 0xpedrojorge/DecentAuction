@@ -7,4 +7,9 @@ public class Constraints {
      */
     public static final int MINING_DIFFICULTY = 2;
 
+    /*
+    Sets the max amount of transactions per block
+     */
+    public static final int MAX_TRANSACTIONS_PER_BLOCK = 10;
+
 }
