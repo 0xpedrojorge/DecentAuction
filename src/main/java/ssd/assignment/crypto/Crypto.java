@@ -1,11 +1,34 @@
 package ssd.assignment.crypto;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
-public class Crypto {
+public class Crypto{
+    public static String getHexString(byte[] arr) {
+        return new BigInteger(arr).toString(16).toUpperCase(); }
+    public KeyPair createKeyPar() throws NoSuchAlgorithmException, NoSuchProviderException {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(2048, new SecureRandom());
+        return generator.generateKeyPair();
+    }
+    public static String sign(String message,PrivateKey privateKey) throws Exception{
+        Signature sign = Signature.getInstance("SHA256withRSA");
+        sign.initSign(privateKey);
+        sign.update(message.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(sign.sign());
+    }
+    public static boolean verify(String message, String signature, PublicKey publicKey) throws Exception {
+        Signature sign = Signature.getInstance("SHA256withRSA");
+        sign.initVerify(publicKey);
+        sign.update(message.getBytes(StandardCharsets.UTF_8));
 
+        byte[] signatureBytes = Base64.getDecoder().decode(signature);
+
+        return sign.verify(Base64.getDecoder().decode(signature));
+    }
     public String sha256(String data) {
         MessageDigest digest;
         byte[] bytes = null;
@@ -22,5 +45,6 @@ public class Crypto {
         }
         return builder.toString();
     }
+
 
 }
