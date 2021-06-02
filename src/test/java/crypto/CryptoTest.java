@@ -14,8 +14,8 @@ class CryptoTest {
     }
     @Test
     public void testKeyPar() throws Exception {
-        KeyPair pair = crypto.createKeyPar();
-        KeyPair pair1 = crypto.createKeyPar();
+        KeyPair pair = crypto.createKeyPair();
+        KeyPair pair1 = crypto.createKeyPair();
         String sign = Crypto.sign("myMessage",pair.getPrivate());
         assertTrue(Crypto.verify("myMessage",sign,pair.getPublic()));
         assertFalse(Crypto.verify("myMessage",sign,pair1.getPublic()));

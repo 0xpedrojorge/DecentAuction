@@ -25,9 +25,7 @@ public class Blockchain {
 
     public void append(Block block) {
         if (this.chain.size() != 0)
-            block.setParentHash(this.chain.get(this.chain.size()-1).getHash());
-        else
-            block.setParentHash("0");
+            block.setParentHash(this.getLastBlock().getHash());
         block.mineBlock();
         this.chain.add(block);
     }
