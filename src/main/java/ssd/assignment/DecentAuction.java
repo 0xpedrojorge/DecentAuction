@@ -13,7 +13,6 @@ public class DecentAuction {
 
         for (Block b : chain.getChain()) {
             System.out.println("Block " + b.getIndex() + ": " + b.getHash());
-            System.out.println();
         }
     }
 }
