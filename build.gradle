@@ -1,4 +1,4 @@
-plugins {
+ plugins {
     id 'java'
 }
 
@@ -9,7 +9,14 @@ repositories {
     mavenCentral()
 }
 
+ jar {
+     manifest {
+         attributes 'Main-Class': 'ssd.assignment.DecentAuction'
+     }
+ }
+
 dependencies {
+    implementation 'org.projectlombok:lombok:1.18.18'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
