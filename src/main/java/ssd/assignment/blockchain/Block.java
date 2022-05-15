@@ -2,7 +2,7 @@ package ssd.assignment.blockchain;
 
 import lombok.Getter;
 import lombok.Setter;
-import ssd.assignment.crypto.Crypto;
+import ssd.assignment.util.Crypto;
 
 import static ssd.assignment.config.Constraints.MINING_DIFFICULTY;
 
