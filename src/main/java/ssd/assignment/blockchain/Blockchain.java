@@ -1,5 +1,7 @@
 package ssd.assignment.blockchain;
 
+import ssd.assignment.blockchain.blocks.Block;
+
 import java.util.ArrayList;
 import java.util.List;
 

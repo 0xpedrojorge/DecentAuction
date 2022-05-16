@@ -40,6 +40,7 @@ public class Crypto{
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+
         StringBuilder builder = new StringBuilder();
         assert bytes != null;
         for (byte b: bytes) {

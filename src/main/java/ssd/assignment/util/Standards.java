@@ -1,6 +1,6 @@
-package ssd.assignment.config;
+package ssd.assignment.util;
 
-public class Constraints {
+public class Standards {
 
     /*
     Sets the amount of zeros at the start of the hash when mining a block
