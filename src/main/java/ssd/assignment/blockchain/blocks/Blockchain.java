@@ -1,4 +1,4 @@
-package ssd.assignment.blockchain;
+package ssd.assignment.blockchain.blocks;
 
 import ssd.assignment.blockchain.blocks.Block;
 

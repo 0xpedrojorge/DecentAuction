@@ -1,12 +1,16 @@
 package ssd.assignment.blockchain.transaction;
 
 import ssd.assignment.util.Crypto;
+import ssd.assignment.util.Helper;
 
 import java.util.List;
 
 public class Transaction {
 
-    private final String id;
+    Crypto crypto = new Crypto();
+
+    private final byte[] id;
+
     private final int version;
     private final TxType type;
 
@@ -24,15 +28,34 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return "Transaction: {id=" + this.id +
+        return "Transaction: {id=" + Helper.toHexString(this.id) +
                 ", version=" + this.version +
                 ", type=" + this.type.name() +
                 ", inputs=" + this.inputs.toString() +
                 ", outputs=" + this.outputs.toString() + "}";
     }
 
-    public String getHash() {
-        Crypto crypto = new Crypto();
+    public byte[] getHash() {
         return crypto.hash(this.toString());
+    }
+
+    public byte[] getId() {
+        return id;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public TxType getType() {
+        return type;
+    }
+
+    public List<TxIn> getInputs() {
+        return inputs;
+    }
+
+    public List<TxOut> getOutputs() {
+        return outputs;
     }
 }
