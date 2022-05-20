@@ -1,51 +1,58 @@
 package ssd.assignment.util;
 
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Base64;
 
-public class Crypto{
+public abstract class Crypto {
 
-    public static String getHexString(byte[] arr) {
-        return new BigInteger(arr).toString(16).toUpperCase(); }
-
-    public KeyPair createKeyPair() throws NoSuchAlgorithmException {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(2048, new SecureRandom());
-        return generator.generateKeyPair();
-    }
-
-    public static String sign(String message,PrivateKey privateKey) throws Exception {
-        Signature sign = Signature.getInstance("SHA256withRSA");
-        sign.initSign(privateKey);
-        sign.update(message.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(sign.sign());
-    }
-
-    public static boolean verify(String message, String signature, PublicKey publicKey) throws Exception {
-        Signature sign = Signature.getInstance("SHA256withRSA");
-        sign.initVerify(publicKey);
-        sign.update(message.getBytes(StandardCharsets.UTF_8));
-
-        return sign.verify(Base64.getDecoder().decode(signature));
-    }
-
-    public String hash(String data) {
-        MessageDigest digest;
-        byte[] bytes = null;
+    public static KeyPair generateKeyPair() {
+        KeyPairGenerator generator = null;
         try {
-            digest = MessageDigest.getInstance("SHA-256");
-            bytes = digest.digest(data.getBytes(StandardCharsets.UTF_8));
+            generator = KeyPairGenerator.getInstance(Standards.KEYGEN_ALGORITHM);
+            generator.initialize(2048, new SecureRandom());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        StringBuilder builder = new StringBuilder();
-        assert bytes != null;
-        for (byte b: bytes) {
-            builder.append(String.format("%02x", b));
+        assert generator != null;
+        return generator.generateKeyPair();
+    }
+
+    public static String sign(String message, PrivateKey privateKey) {
+        String signature = null;
+        try {
+            Signature sign = Signature.getInstance(Standards.SIGNING_ALGORITHM);
+            sign.initSign(privateKey);
+            sign.update(Helper.toByteArray(message));
+            signature = Helper.toHexString(sign.sign());
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
+            e.printStackTrace();
         }
-        return builder.toString();
+        return signature;
+    }
+
+    public static boolean verifySignature(String message, String signature, PublicKey publicKey) {
+        boolean isVerified = false;
+        try {
+            Signature sign = Signature.getInstance(Standards.SIGNING_ALGORITHM);
+            sign.initVerify(publicKey);
+            sign.update(Helper.toByteArray(message));
+            sign.verify(Helper.toByteArray(signature));
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        return isVerified;
+    }
+
+    public static byte[] hash(String data) {
+        byte[] bytes = null;
+        try {
+            MessageDigest digest = MessageDigest.getInstance(Standards.DIGEST_ALGORITHM);
+            bytes = digest.digest(Helper.toByteArray(data));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 
 
