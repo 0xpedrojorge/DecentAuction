@@ -20,7 +20,7 @@ public class Standards {
     /*
     Sets the amount of zeros at the start of the hash when mining a block
      */
-    public static final int MINING_DIFFICULTY = 2;
+    public static final int MINING_DIFFICULTY = 3;
 
     /*
     Sets the max amount of transactions per block

@@ -1,5 +1,8 @@
 package ssd.assignment.util;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+
 public class Helper {
 
     public static String toHexString(byte[] bytes) {
@@ -9,9 +12,10 @@ public class Helper {
             builder.append(String.format("%02x", b));
         }
         return builder.toString();
+
     }
 
     public static byte[] toByteArray(String string) {
-        return null;
+        return string.getBytes(StandardCharsets.UTF_8);
     }
 }
