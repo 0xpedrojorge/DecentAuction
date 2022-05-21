@@ -1,15 +1,27 @@
 package ssd.assignment.blockchain.transactions;
 
 import com.google.gson.GsonBuilder;
+import ssd.assignment.util.Crypto;
+import ssd.assignment.util.Helper;
+
+import java.security.PublicKey;
 
 public class TxOutput {
 
-    private final float value;
-    private final String scriptPubKey;
+    public String id;
+    public PublicKey reciepient; //also known as the new owner of these coins.
+    public float amount; //the amount of coins they own
+    public String parentTransactionId; //the id of the transaction this output was created in
 
-    public TxOutput(float value, String scriptPubKey) {
-        this.value = value;
-        this.scriptPubKey = scriptPubKey;
+    public TxOutput(PublicKey reciepient, float amount, String parentTransactionId) {
+        this.reciepient = reciepient;
+        this.amount = amount;
+        this.parentTransactionId = parentTransactionId;
+        this.id = Crypto.hash(this.toString());
+    }
+
+    public boolean isMine(PublicKey publicKey) {
+        return (publicKey == reciepient);
     }
 
     @Override
