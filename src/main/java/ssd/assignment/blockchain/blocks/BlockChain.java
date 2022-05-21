@@ -10,12 +10,12 @@ import ssd.assignment.util.Standards;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Blockchain {
+public class BlockChain {
 
     public ArrayList<Block> blocks;
     public HashMap<String, TxOutput> UTXOs = new HashMap<>();
 
-    public Blockchain() {
+    public BlockChain() {
         blocks = new ArrayList<>();
     }
 
@@ -30,25 +30,25 @@ public class Blockchain {
             previousBlock = blocks.get(i - 1);
 
             //check if hash is solved
-            if(!currentBlock.getHash().substring(0, Standards.MINING_DIFFICULTY).equals(target)) {
+            if(!currentBlock.getHeader().getHash().substring(0, Standards.MINING_DIFFICULTY).equals(target)) {
                 System.out.println("This block hasn't been mined");
                 return false;
             }
 
-            if (!currentBlock.getHash().equals(currentBlock.calculateHash())) {
+            if (!currentBlock.getHeader().getHash().equals(currentBlock.calculateHash())) {
                 System.out.println("Current hash mismatch");
                 return false;
             }
 
-            if (!previousBlock.getHash().equals(currentBlock.getParentHash())) {
+            if (!previousBlock.getHeader().getHash().equals(currentBlock.getHeader().getParentHash())) {
                 System.out.println("Parent hash mismatch");
                 return false;
             }
 
             //loop thru blockchains transactions:
             TxOutput tempOutput;
-            for(int t=0; t <currentBlock.transactions.size(); t++) {
-                Transaction currentTransaction = currentBlock.transactions.get(t);
+            for(int t=0; t <currentBlock.getTransactions().size(); t++) {
+                Transaction currentTransaction = currentBlock.getTransactions().get(t);
 
                 if(!currentTransaction.verifiySignature()) {
                     System.out.println("#Signature on Transaction(" + t + ") is Invalid");
