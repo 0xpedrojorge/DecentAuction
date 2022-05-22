@@ -6,6 +6,7 @@ import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.util.Helper;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 @Getter
 public class Block {
@@ -33,18 +34,22 @@ public class Block {
     }
 
     //Add transactions to this block
-    public boolean addTransaction(Transaction transaction) {
-        //process transaction and check if valid, unless block is genesis block then ignore.
-        if(transaction == null) return false;
-        if((!header.parentHash.equals("0"))) {
-            if((!transaction.processTransaction())) {
+    public void addTransactions(LinkedList<Transaction> transactionList) {
+        for (Transaction transaction : transactionList) {
+            //process transaction and check if valid, unless block is genesis block then ignore.
+            if(transaction == null)  {
                 System.out.println("Transaction failed to process. Discarded.");
-                return false;
+                continue;
             }
+            if((!header.parentHash.equals("0"))) {
+                if((!transaction.verifiySignature())) {
+                    System.out.println("Transaction Signature failed to verify. Discarded.");
+                    continue;
+                }
+            }
+            transactions.add(transaction);
+            System.out.println("Transaction Successfully added to Block");
         }
-        transactions.add(transaction);
-        System.out.println("Transaction Successfully added to Block");
-        return true;
     }
 
     @Override

@@ -1,10 +1,12 @@
 package ssd.assignment;
 
+import ssd.assignment.blockchain.Wallet;
 import ssd.assignment.blockchain.blocks.Block;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxOutput;
-import ssd.assignment.blockchain.transactions.Wallet;
+
+import java.util.LinkedList;
 
 public class DecentAuction {
 
@@ -26,28 +28,34 @@ public class DecentAuction {
 
         System.out.println("Creating and Mining Genesis block... ");
         Block genesis = new Block("0");
-        genesis.addTransaction(genesisTransaction);
+        LinkedList<Transaction> genesisTransactionList = new LinkedList<>();
+        genesisTransactionList.add(genesisTransaction);
+        genesis.addTransactions(genesisTransactionList);
         blockchain.addBlock(genesis);
 
         Block block1 = new Block(genesis.getHeader().hash);
         System.out.println("\nWalletA's balance is: " + walletA.getBalance());
         System.out.println("\nWalletA is Attempting to send funds (40) to WalletB...");
-        block1.addTransaction(walletA.sendFunds(walletB.publicKey, 40f));
+        Transaction t = walletA.createTransaction(blockchain.transactionPool, walletB.publicKey, 40f);
+        //block1.addTransactions(blockchain.transactionPool.getTransactions(2));
+        //blockchain.addBlock(block1);
+        System.out.println("\nWalletA's balance is: " + walletA.getBalance());
+        System.out.println("WalletB's balance is: " + walletB.getBalance());
+
+        //Block block2 = new Block(block1.getHeader().hash);
+        System.out.println("\nWalletA Attempting to send more funds (1000) than it has...");
+        walletA.createTransaction(blockchain.transactionPool, walletB.publicKey, 1000f);
+        System.out.println("Pending transactions: " + blockchain.transactionPool.getPoolSize());
+        block1.addTransactions(blockchain.transactionPool.getTransactions(2));
         blockchain.addBlock(block1);
         System.out.println("\nWalletA's balance is: " + walletA.getBalance());
         System.out.println("WalletB's balance is: " + walletB.getBalance());
 
-        Block block2 = new Block(block1.getHeader().hash);
-        System.out.println("\nWalletA Attempting to send more funds (1000) than it has...");
-        block2.addTransaction(walletA.sendFunds(walletB.publicKey, 1000f));
-        blockchain.addBlock(block2);
-        System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-        System.out.println("WalletB's balance is: " + walletB.getBalance());
-
-        Block block3 = new Block(block2.getHeader().hash);
+        Block block3 = new Block(block1.getHeader().hash);
         System.out.println("\nWalletB is Attempting to send funds (20) to WalletA...");
-        block3.addTransaction(walletB.sendFunds( walletA.publicKey, 20));
-        //blockchain.addBlock(block3);
+        walletA.createTransaction(blockchain.transactionPool, walletB.publicKey, 20f);
+        block3.addTransactions(blockchain.transactionPool.getTransactions(2));
+        blockchain.addBlock(block3);
         System.out.println("\nWalletA's balance is: " + walletA.getBalance());
         System.out.println("WalletB's balance is: " + walletB.getBalance());
 

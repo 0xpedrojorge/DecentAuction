@@ -2,7 +2,6 @@ package ssd.assignment.blockchain.transactions;
 
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import ssd.assignment.DecentAuction;
 import ssd.assignment.util.Crypto;
 import ssd.assignment.util.CustomExclusionStrategy;
 import ssd.assignment.util.Helper;
@@ -20,65 +19,28 @@ public class Transaction {
     public float amount;
     public byte[] signature;
 
-    private ArrayList<TxInput> inputs;
-    private ArrayList<TxOutput> outputs= new ArrayList<>();
-
-    private static int sequence = 0; // a rough count of how many transactions have been generated.
+    private final ArrayList<TxInput> inputs;
+    private final ArrayList<TxOutput> outputs;
 
     public Transaction(PublicKey sender, PublicKey reciepient, float amount, ArrayList<TxInput> inputs) {
         this.sender = sender;
         this.reciepient = reciepient;
         this.amount = amount;
         this.inputs = inputs;
+        this.outputs = new ArrayList<>();
     }
 
-    //Signs all the data we don't wish to be tampered with.
     public void generateSignature(PrivateKey privateKey) {
         String data = Helper.getStringFromKey(sender) + Helper.getStringFromKey(reciepient) + amount;
         signature = Crypto.sign(data, privateKey);
     }
 
-    //Verifies the data we signed hasn't been tampered with
     public boolean verifiySignature() {
         String data = Helper.getStringFromKey(sender) + Helper.getStringFromKey(reciepient) + amount;
         return Crypto.verifySignature(data, signature, sender);
     }
 
-    //Returns true if new transaction could be created
-    public boolean processTransaction() {
-
-        if(!verifiySignature()) {
-            System.out.println("Transaction Signature failed to verify");
-            return false;
-        }
-
-        //gather transaction inputs (Make sure they are unspent):
-        for(TxInput i : inputs) {
-            i.UTXO = DecentAuction.blockchain.UTXOs.get(i.transactionOutputId);
-        }
-
-        //generate transaction outputs:
-        float leftOver = getInputsValue() - amount; //get value of inputs then the leftover change:
-        id = calculateTxId(this);
-        outputs.add(new TxOutput(this.reciepient, amount, id)); //send value to recipient
-        outputs.add(new TxOutput(this.sender, leftOver, id)); //send the left over 'change' back to sender
-
-        //add outputs to Unspent list
-        for(TxOutput o : outputs) {
-            DecentAuction.blockchain.UTXOs.put(o.id , o);
-        }
-
-        //remove transaction inputs from UTXO lists as spent:
-        for(TxInput i : inputs) {
-            if(i.UTXO == null) continue; //if Transaction can't be found skip it
-            DecentAuction.blockchain.UTXOs.remove(i.UTXO.id);
-        }
-
-        return true;
-    }
-
-    //returns sum of inputs(UTXOs) values
-    public float getInputsValue() {
+    public float getInputsAmount() {
         float total = 0;
         for(TxInput i : inputs) {
             if(i.UTXO == null) continue; //if Transaction can't be found skip it
@@ -87,8 +49,7 @@ public class Transaction {
         return total;
     }
 
-    //returns sum of outputs:
-    public float getOutputsValue() {
+    public float getOutputsAmount() {
         float total = 0;
         for(TxOutput o : outputs) {
             total += o.amount;

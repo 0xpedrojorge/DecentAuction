@@ -1,6 +1,7 @@
 package ssd.assignment.blockchain.blocks;
 
 import com.google.gson.GsonBuilder;
+import ssd.assignment.blockchain.TransactionPool;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxInput;
 import ssd.assignment.blockchain.transactions.TxOutput;
@@ -13,10 +14,13 @@ import java.util.HashMap;
 public class BlockChain {
 
     public ArrayList<Block> blocks;
-    public HashMap<String, TxOutput> UTXOs = new HashMap<>();
+    public TransactionPool transactionPool;
+    public HashMap<String, TxOutput> UTXOs;
 
     public BlockChain() {
         blocks = new ArrayList<>();
+        transactionPool = new TransactionPool();
+        UTXOs = new HashMap<>();
     }
 
     public boolean isValid() {
@@ -54,7 +58,7 @@ public class BlockChain {
                     System.out.println("#Signature on Transaction(" + t + ") is Invalid");
                     return false;
                 }
-                if(currentTransaction.getInputsValue() != currentTransaction.getOutputsValue()) {
+                if(currentTransaction.getInputsAmount() != currentTransaction.getOutputsAmount()) {
                     System.out.println("#Inputs are note equal to outputs on Transaction(" + t + ")");
                     return false;
                 }

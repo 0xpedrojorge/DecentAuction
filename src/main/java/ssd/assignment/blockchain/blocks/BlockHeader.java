@@ -2,11 +2,8 @@ package ssd.assignment.blockchain.blocks;
 
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.util.Crypto;
 import ssd.assignment.util.CustomExclusionStrategy;
-
-import java.util.ArrayList;
 
 @Getter
 public class BlockHeader {
