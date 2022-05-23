@@ -70,5 +70,4 @@ public class Transaction {
     public String toString() {
         return new GsonBuilder().create().toJson(this);
     }
-
 }

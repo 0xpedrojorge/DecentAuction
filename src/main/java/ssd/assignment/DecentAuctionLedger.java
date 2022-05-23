@@ -1,18 +1,26 @@
 package ssd.assignment;
 
+import lombok.Getter;
 import ssd.assignment.blockchain.Wallet;
 import ssd.assignment.blockchain.blocks.Block;
 import ssd.assignment.blockchain.blocks.BlockChain;
+import ssd.assignment.blockchain.miners.MiningManager;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxOutput;
 
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
-public class DecentAuction {
 
-    public static BlockChain blockchain = new BlockChain();
+public class DecentAuctionLedger {
+    @Getter
+    private static BlockChain blockchain;
+    private MiningManager miningManager;
 
-    public static void main(String[] args) {
+
+    public DecentAuctionLedger(String[] args) {
+
+        startBlockchain();
 
         //Create wallets:
         Wallet walletA = new Wallet();
@@ -24,43 +32,45 @@ public class DecentAuction {
         genesisTransaction.generateSignature(coinbase.privateKey);
         genesisTransaction.id = "0";
         genesisTransaction.getOutputs().add(new TxOutput(genesisTransaction.reciepient, genesisTransaction.amount, genesisTransaction.id));
-        blockchain.UTXOs.put(genesisTransaction.getOutputs().get(0).id, genesisTransaction.getOutputs().get(0));
+        blockchain.getUTXOs().put(genesisTransaction.getOutputs().get(0).id, genesisTransaction.getOutputs().get(0));
+        blockchain.getTransactionPool().addTransaction(genesisTransaction);
 
-        System.out.println("Creating and Mining Genesis block... ");
-        Block genesis = new Block("0");
-        LinkedList<Transaction> genesisTransactionList = new LinkedList<>();
-        genesisTransactionList.add(genesisTransaction);
-        genesis.addTransactions(genesisTransactionList);
-        blockchain.addBlock(genesis);
-
-        Block block1 = new Block(genesis.getHeader().hash);
         System.out.println("\nWalletA's balance is: " + walletA.getBalance());
         System.out.println("\nWalletA is Attempting to send funds (40) to WalletB...");
-        Transaction t = walletA.createTransaction(blockchain.transactionPool, walletB.publicKey, 40f);
-        //block1.addTransactions(blockchain.transactionPool.getTransactions(2));
-        //blockchain.addBlock(block1);
+
+        blockchain.getTransactionPool().addTransaction(walletA.createTransaction(walletB.publicKey, 40f));
         System.out.println("\nWalletA's balance is: " + walletA.getBalance());
         System.out.println("WalletB's balance is: " + walletB.getBalance());
 
-        //Block block2 = new Block(block1.getHeader().hash);
         System.out.println("\nWalletA Attempting to send more funds (1000) than it has...");
-        walletA.createTransaction(blockchain.transactionPool, walletB.publicKey, 1000f);
-        System.out.println("Pending transactions: " + blockchain.transactionPool.getPoolSize());
-        block1.addTransactions(blockchain.transactionPool.getTransactions(2));
-        blockchain.addBlock(block1);
+        blockchain.getTransactionPool().addTransaction(walletA.createTransaction(walletB.publicKey, 1000f));
+        System.out.println("Pending transactions: " + blockchain.getTransactionPool().getPoolSize());
         System.out.println("\nWalletA's balance is: " + walletA.getBalance());
         System.out.println("WalletB's balance is: " + walletB.getBalance());
 
-        Block block3 = new Block(block1.getHeader().hash);
         System.out.println("\nWalletB is Attempting to send funds (20) to WalletA...");
-        walletA.createTransaction(blockchain.transactionPool, walletB.publicKey, 20f);
-        block3.addTransactions(blockchain.transactionPool.getTransactions(2));
-        blockchain.addBlock(block3);
+        blockchain.getTransactionPool().addTransaction(walletA.createTransaction(walletB.publicKey, 20f));
         System.out.println("\nWalletA's balance is: " + walletA.getBalance());
         System.out.println("WalletB's balance is: " + walletB.getBalance());
+
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         System.out.print("Is blockchain valid? " + blockchain.isValid());
 
         //System.out.println(blockchain.toPrettyString());
+
+    }
+
+    private void startBlockchain() {
+        blockchain = new BlockChain();
+        miningManager = new MiningManager(blockchain);
+    }
+
+    public static void main(String[] args) {
+        new DecentAuctionLedger(args);
     }
 }

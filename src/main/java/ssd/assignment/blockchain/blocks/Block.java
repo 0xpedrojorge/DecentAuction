@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 @Getter
-public class Block {
+public class Block implements Cloneable {
 
     private final BlockHeader header;
     private final ArrayList<Transaction> transactions = new ArrayList<>();
@@ -20,17 +20,6 @@ public class Block {
 
     public String calculateHash() {
         return header.calculateHash();
-    }
-
-    //Increases nonce value until hash target is reached.
-    public void mineBlock(int difficulty) {
-        header.merkleRoot = Helper.getMerkleRoot(transactions);
-        String target = Helper.getDificultyString(difficulty);
-        while(!header.hash.substring( 0, difficulty).equals(target)) {
-            header.nonce ++;
-            header.hash = calculateHash();
-        }
-        System.out.println("Block Mined!!! : " + header.hash);
     }
 
     //Add transactions to this block
@@ -50,6 +39,11 @@ public class Block {
             transactions.add(transaction);
             System.out.println("Transaction Successfully added to Block");
         }
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     @Override

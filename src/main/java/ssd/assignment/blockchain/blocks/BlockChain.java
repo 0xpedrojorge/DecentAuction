@@ -1,6 +1,7 @@
 package ssd.assignment.blockchain.blocks;
 
 import com.google.gson.GsonBuilder;
+import lombok.Getter;
 import ssd.assignment.blockchain.TransactionPool;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxInput;
@@ -11,11 +12,12 @@ import ssd.assignment.util.Standards;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+@Getter
 public class BlockChain {
 
-    public ArrayList<Block> blocks;
-    public TransactionPool transactionPool;
-    public HashMap<String, TxOutput> UTXOs;
+    private final ArrayList<Block> blocks;
+    private final TransactionPool transactionPool;
+    private final HashMap<String, TxOutput> UTXOs;
 
     public BlockChain() {
         blocks = new ArrayList<>();
@@ -23,6 +25,7 @@ public class BlockChain {
         UTXOs = new HashMap<>();
     }
 
+    //TODO change this up
     public boolean isValid() {
         Block currentBlock, previousBlock;
         String target = Helper.getDificultyString(Standards.MINING_DIFFICULTY);
@@ -49,7 +52,7 @@ public class BlockChain {
                 return false;
             }
 
-            //loop thru blockchains transactions:
+            //loop through blockchains transactions:
             TxOutput tempOutput;
             for(int t=0; t <currentBlock.getTransactions().size(); t++) {
                 Transaction currentTransaction = currentBlock.getTransactions().get(t);
@@ -98,8 +101,12 @@ public class BlockChain {
     }
 
     public void addBlock(Block newBlock) {
-        newBlock.mineBlock(Standards.MINING_DIFFICULTY);
         blocks.add(newBlock);
+    }
+
+    public Block getLatesBlock() {
+        if (blocks.size() == 0) return null;
+        return blocks.get(blocks.size()-1);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package ssd.assignment.blockchain;
 
-import ssd.assignment.DecentAuction;
+import ssd.assignment.DecentAuctionLedger;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxInput;
 import ssd.assignment.blockchain.transactions.TxOutput;
@@ -34,7 +34,7 @@ public class Wallet {
 
     public float getBalance() {
         float total = 0;
-        for (Map.Entry<String, TxOutput> item: DecentAuction.blockchain.UTXOs.entrySet()){
+        for (Map.Entry<String, TxOutput> item: DecentAuctionLedger.getBlockchain().getUTXOs().entrySet()){
             TxOutput UTXO = item.getValue();
             if(UTXO.isMine(publicKey)) { //if output belongs to me ( if coins belong to me )
                 UTXOs.put(UTXO.id,UTXO); //add it to our list of unspent transactions.
@@ -45,7 +45,7 @@ public class Wallet {
     }
 
 
-    public Transaction createTransaction(TransactionPool pool, PublicKey recipient, float amount) {
+    public Transaction createTransaction(PublicKey recipient, float amount) {
 
         if(getBalance() < amount) {
             System.out.println("Not Enough funds to send transaction. Transaction Discarded.");
@@ -73,7 +73,7 @@ public class Wallet {
 
         //gather transaction inputs (Make sure they are unspent):
         for(TxInput i : inputs) {
-            i.UTXO = DecentAuction.blockchain.UTXOs.get(i.transactionOutputId);
+            i.UTXO = DecentAuctionLedger.getBlockchain().getUTXOs().get(i.transactionOutputId);
         }
 
         //generate transaction outputs:
@@ -84,17 +84,16 @@ public class Wallet {
 
         //add outputs to Unspent list
         for(TxOutput o : newTransaction.getOutputs()) {
-            DecentAuction.blockchain.UTXOs.put(o.id , o);
+            DecentAuctionLedger.getBlockchain().getUTXOs().put(o.id , o);
         }
 
         //remove transaction inputs from UTXO lists as spent:
         for(TxInput i : inputs) {
             if(i.UTXO == null) continue;
-            DecentAuction.blockchain.UTXOs.remove(i.UTXO.id);
+            DecentAuctionLedger.getBlockchain().getUTXOs().remove(i.UTXO.id);
         }
 
-        //add transaction to the pool
-        pool.addTransaction(newTransaction);
+        //TODO broadcast transaction
 
         return newTransaction;
     }

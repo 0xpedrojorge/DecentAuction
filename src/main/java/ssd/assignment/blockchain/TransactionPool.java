@@ -5,25 +5,27 @@ import ssd.assignment.blockchain.transactions.Transaction;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class TransactionPool {
 
     private final List<Transaction> pendingTransactions;
+    private final List<Consumer<Integer>> consumers;
 
     public TransactionPool() {
         this.pendingTransactions = new ArrayList<>();
+        this.consumers = new LinkedList<>();
     }
 
-    //Add transactions to the pool
-    public boolean addTransaction(Transaction transaction) {
-        if(transaction == null) return false;
+    public void addTransaction(Transaction transaction) {
+        if (transaction == null) return;
 
         pendingTransactions.add(transaction);
-        System.out.println("Transaction Successfully added to the pool");
-        return true;
+        for (Consumer<Integer> consumer : consumers) {
+            consumer.accept(pendingTransactions.size());
+        }
     }
 
-    // Get at most N transactions from pool
     public LinkedList<Transaction> getTransactions(int n) {
         LinkedList<Transaction> transactionsToRemove = new LinkedList<>();
         for (int i = 0; i < n && !pendingTransactions.isEmpty(); i++) {
@@ -34,6 +36,10 @@ public class TransactionPool {
 
     public int getPoolSize() {
         return pendingTransactions.size();
+    }
+
+    public void registerSubscriber(Consumer<Integer> consumer) {
+        consumers.add(consumer);
     }
 
 }
