@@ -21,6 +21,7 @@ public class DecentAuctionLedger {
     public DecentAuctionLedger(String[] args) {
 
         startBlockchain();
+        startP2Pserver();
 
         //Create wallets:
         Wallet walletA = new Wallet();
@@ -68,6 +69,10 @@ public class DecentAuctionLedger {
     private void startBlockchain() {
         blockchain = new BlockChain();
         miningManager = new MiningManager(blockchain);
+    }
+
+    private void startP2Pserver() {
+
     }
 
     public static void main(String[] args) {

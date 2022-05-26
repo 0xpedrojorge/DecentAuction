@@ -1,4 +1,4 @@
-package ssd.assignment.grpc;
+package ssd.assignment.communication.grpc;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -12,16 +12,17 @@ public class DecentAuctionServer {
 
     private static final Logger logger = Logger.getLogger(DecentAuctionServer.class.getName());
 
+    /* The port on which the server should run */
+    private static final int PORT= 50051;
+
     private Server server;
 
     private void start() throws IOException {
-        /* The port on which the server should run */
-        int port = 50051;
-        server = ServerBuilder.forPort(port)
+        server = ServerBuilder.forPort(PORT)
                 .addService(new P2PServerImpl())
                 .build()
                 .start();
-        logger.info("Server started, listening on " + port);
+        logger.info("Server started, listening on " + PORT);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             System.err.println("*** shutting down gRPC server since JVM is shutting down");
@@ -65,6 +66,21 @@ public class DecentAuctionServer {
             Pong reply = Pong.newBuilder().setMessage(req.getName()).build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
+        }
+
+        @Override
+        public void findNode(exampleRequest request, StreamObserver<exampleReply> responseObserver) {
+            super.findNode(request, responseObserver);
+        }
+
+        @Override
+        public void store(exampleRequest request, StreamObserver<exampleReply> responseObserver) {
+            super.store(request, responseObserver);
+        }
+
+        @Override
+        public void findValue(exampleRequest request, StreamObserver<exampleReply> responseObserver) {
+            super.findValue(request, responseObserver);
         }
     }
 

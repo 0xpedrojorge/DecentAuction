@@ -1,4 +1,4 @@
-package ssd.assignment.grpc;
+package ssd.assignment.communication.grpc;
 
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
