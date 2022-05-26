@@ -4,14 +4,11 @@ import com.google.gson.GsonBuilder;
 
 public class TxInput {
 
-    private final String transactionId;
-    private final int outputIndex;
-    private final String scriptSig;
+    public String transactionOutputId; //Reference to TransactionOutputs -> transactionId
+    public TxOutput UTXO; //Contains the Unspent transaction output
 
-    public TxInput(String transactionId, int outputIndex, String scriptSig) {
-        this.transactionId = transactionId;
-        this.outputIndex = outputIndex;
-        this.scriptSig = scriptSig;
+    public TxInput(String transactionOutputId) {
+        this.transactionOutputId = transactionOutputId;
     }
 
     @Override

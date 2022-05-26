@@ -1,8 +1,6 @@
 package ssd.assignment.util;
 
-import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.Base64;
 
 public abstract class Crypto {
 
@@ -18,33 +16,33 @@ public abstract class Crypto {
         return generator.generateKeyPair();
     }
 
-    public static String sign(String message, PrivateKey privateKey) {
-        String signature = null;
+    public static byte[] sign(String message, PrivateKey privateKey) {
+        byte[] s = null;
         try {
             Signature sign = Signature.getInstance(Standards.SIGNING_ALGORITHM);
             sign.initSign(privateKey);
             sign.update(Helper.toByteArray(message));
-            signature = Helper.toHexString(sign.sign());
+            s = sign.sign();
         } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();
         }
-        return signature;
+        return s;
     }
 
-    public static boolean verifySignature(String message, String signature, PublicKey publicKey) {
+    public static boolean verifySignature(String message, byte[] signature, PublicKey publicKey) {
         boolean isVerified = false;
         try {
             Signature sign = Signature.getInstance(Standards.SIGNING_ALGORITHM);
             sign.initVerify(publicKey);
             sign.update(Helper.toByteArray(message));
-            sign.verify(Helper.toByteArray(signature));
+            isVerified = sign.verify(signature);
         } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();
         }
         return isVerified;
     }
 
-    public static byte[] hash(String data) {
+    public static String hash(String data) {
         byte[] bytes = null;
         try {
             MessageDigest digest = MessageDigest.getInstance(Standards.DIGEST_ALGORITHM);
@@ -52,7 +50,8 @@ public abstract class Crypto {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        return bytes;
+        assert bytes != null;
+        return Helper.toHexString(bytes);
     }
 
 

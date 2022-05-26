@@ -6,28 +6,60 @@ import ssd.assignment.util.Crypto;
 import ssd.assignment.util.CustomExclusionStrategy;
 import ssd.assignment.util.Helper;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+
 @Getter
 public class Transaction {
 
-    private final String id;
-    private final short version;
+    public String id;
+    public PublicKey sender;
+    public PublicKey reciepient;
+    public float amount;
+    public byte[] signature;
 
-    private final TxInput[] inputs;
-    private final TxOutput[] outputs;
+    private final ArrayList<TxInput> inputs;
+    private final ArrayList<TxOutput> outputs;
 
-    public Transaction(short version, TxInput[] inputs, TxOutput[] outputs) {
-        this.version = version;
+    public Transaction(PublicKey sender, PublicKey reciepient, float amount, ArrayList<TxInput> inputs) {
+        this.sender = sender;
+        this.reciepient = reciepient;
+        this.amount = amount;
         this.inputs = inputs;
-        this.outputs = outputs;
-
-        this.id = calculateTxId(this);
+        this.outputs = new ArrayList<>();
     }
 
+    public void generateSignature(PrivateKey privateKey) {
+        String data = Helper.getStringFromKey(sender) + Helper.getStringFromKey(reciepient) + amount;
+        signature = Crypto.sign(data, privateKey);
+    }
 
+    public boolean verifiySignature() {
+        String data = Helper.getStringFromKey(sender) + Helper.getStringFromKey(reciepient) + amount;
+        return Crypto.verifySignature(data, signature, sender);
+    }
+
+    public float getInputsAmount() {
+        float total = 0;
+        for(TxInput i : inputs) {
+            if(i.UTXO == null) continue; //if Transaction can't be found skip it
+            total += i.UTXO.amount;
+        }
+        return total;
+    }
+
+    public float getOutputsAmount() {
+        float total = 0;
+        for(TxOutput o : outputs) {
+            total += o.amount;
+        }
+        return total;
+    }
 
     public static String calculateTxId(Transaction transaction) {
         String txWithoutId = new GsonBuilder().setExclusionStrategies(new CustomExclusionStrategy()).create().toJson(transaction);
-        return Helper.toHexString(Crypto.hash(txWithoutId));
+        return Crypto.hash(txWithoutId);
     }
 
     public static boolean checkTxId(Transaction transaction) {
@@ -38,5 +70,4 @@ public class Transaction {
     public String toString() {
         return new GsonBuilder().create().toJson(this);
     }
-
 }

@@ -2,30 +2,27 @@ package ssd.assignment.blockchain.blocks;
 
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import lombok.Setter;
+import ssd.assignment.util.Crypto;
+import ssd.assignment.util.CustomExclusionStrategy;
 
 @Getter
-@Setter
 public class BlockHeader {
 
-    private long blockNumber;
-    private short version;
     public String hash;
     public String parentHash;
-    private long timeStamp;
-    private int nonce;
-    private String merkleRoot;
+    public String merkleRoot;
+    public long timeStamp;
+    public int nonce;
 
-
-    public BlockHeader(long blockNumber, short version, String parentHash) {
-        this.blockNumber = blockNumber;
-        this.version = version;
+    public BlockHeader(String parentHash) {
         this.parentHash = parentHash;
         this.timeStamp = System.currentTimeMillis();
+
+        this.hash = calculateHash();
     }
 
-    @Override
-    public String toString() {
-        return new GsonBuilder().create().toJson(this);
+    public String calculateHash() {
+        String blockWithoutId = new GsonBuilder().setExclusionStrategies(new CustomExclusionStrategy()).create().toJson(this);
+        return Crypto.hash(blockWithoutId);
     }
 }

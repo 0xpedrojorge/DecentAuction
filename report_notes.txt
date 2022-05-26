@@ -1,0 +1,3 @@
+- Double Spending problem
+- P2PKH vs P2PK (?)
+    - Avoiding Key Reuse: https://developer.bitcoin.org/devguide/transactions.html#avoiding-key-reuse
