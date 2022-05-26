@@ -6,3 +6,4 @@
     - valor de K e alpha
     - passagem de nós ausentes para fim de bucket
     - casos de uso como exemplo
+    - ter mais que um nó de bootstrap (resiliência)
