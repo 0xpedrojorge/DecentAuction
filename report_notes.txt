@@ -1,3 +1,7 @@
 - Double Spending problem
 - P2PKH vs P2PK (?)
     - Avoiding Key Reuse: https://developer.bitcoin.org/devguide/transactions.html#avoiding-key-reuse
+
+- Kadmelia: Diferenças entre protocolo ideal e protocolo prático
+    - valor de K e alpha
+    - passagem de nós ausentes para fim de bucket
