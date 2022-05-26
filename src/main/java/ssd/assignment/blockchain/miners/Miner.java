@@ -27,6 +27,7 @@ public class Miner extends Thread {
             block.getHeader().nonce ++;
             block.getHeader().hash = block.calculateHash();
         }
+
         if (!isInterrupted()) {
             System.out.println("Block Mined!!! : " + block.getHeader().hash);
 

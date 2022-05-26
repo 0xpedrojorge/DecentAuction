@@ -32,10 +32,10 @@ public class MiningManager {
             LinkedList<Transaction> newTransactions = transactionPool.getTransactions(n);
 
             Block newBlock;
-            if (blockChain.getLatesBlock() == null) {
+            if (blockChain.getLatestBlock() == null) {
                 newBlock = new Block("0");
             } else {
-                newBlock = new Block(blockChain.getLatesBlock().getHeader().hash);
+                newBlock = new Block(blockChain.getLatestBlock().getHeader().hash);
             }
             newBlock.addTransactions(newTransactions);
 

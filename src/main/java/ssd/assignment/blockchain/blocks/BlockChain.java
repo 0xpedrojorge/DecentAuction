@@ -17,6 +17,7 @@ public class BlockChain {
 
     private final ArrayList<Block> blocks;
     private final TransactionPool transactionPool;
+    //TODO move utxo's out of here
     private final HashMap<String, TxOutput> UTXOs;
 
     public BlockChain() {
@@ -104,7 +105,7 @@ public class BlockChain {
         blocks.add(newBlock);
     }
 
-    public Block getLatesBlock() {
+    public Block getLatestBlock() {
         if (blocks.size() == 0) return null;
         return blocks.get(blocks.size()-1);
     }

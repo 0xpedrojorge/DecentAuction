@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "ssd.assignment.grpc";
+option java_outer_classname = "DecentAuctionProto";
+option objc_class_prefix = "DA";
+
+package decentauction;
+
+service P2PServer {
+  rpc ping(Ping) returns (Pong) {}
+}
+
+message Ping {
+  string name = 1;
+}
+
+message Pong {
+  string message = 1;
+}
