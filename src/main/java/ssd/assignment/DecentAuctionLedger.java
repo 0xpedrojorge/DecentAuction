@@ -7,7 +7,9 @@ import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxOutput;
+import ssd.assignment.communication.grpc.DecentAuctionServer;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +22,7 @@ public class DecentAuctionLedger {
 
     public DecentAuctionLedger(String[] args) {
 
-        startBlockchain();
+        //startBlockchain();
         startP2Pserver();
 
         //Create wallets:
@@ -72,7 +74,13 @@ public class DecentAuctionLedger {
     }
 
     private void startP2Pserver() {
-
+        final DecentAuctionServer server = new DecentAuctionServer();
+        try {
+            server.start();
+            server.blockUntilShutdown();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void main(String[] args) {

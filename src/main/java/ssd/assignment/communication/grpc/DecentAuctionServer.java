@@ -17,7 +17,7 @@ public class DecentAuctionServer {
 
     private Server server;
 
-    private void start() throws IOException {
+    public void start() throws IOException {
         server = ServerBuilder.forPort(PORT)
                 .addService(new P2PServerImpl())
                 .build()
@@ -44,7 +44,7 @@ public class DecentAuctionServer {
     /**
      * Await termination on the main thread since the grpc library uses daemon threads.
      */
-    private void blockUntilShutdown() throws InterruptedException {
+    public void blockUntilShutdown() throws InterruptedException {
         if (server != null) {
             server.awaitTermination();
         }
