@@ -5,3 +5,4 @@
 - Kademlia: Diferenças entre protocolo ideal e protocolo prático
     - valor de K e alpha
     - passagem de nós ausentes para fim de bucket
+    - casos de uso como exemplo
