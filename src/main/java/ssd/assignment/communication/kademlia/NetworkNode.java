@@ -15,6 +15,8 @@ public class NetworkNode {
     private final DecentAuctionServer server;
     private final DecentAuctionClientManager clientManager;
 
+    private final KRoutingTable KRoutingTable;
+
     public NetworkNode(byte[] nodeId, int port) {
         this.nodeId = nodeId;
         this.port = port;
@@ -31,6 +33,8 @@ public class NetworkNode {
         });
         serverBlockedThread.start();
         this.clientManager = new DecentAuctionClientManager();
+
+        this.KRoutingTable = new KRoutingTable(this);
 
     }
 

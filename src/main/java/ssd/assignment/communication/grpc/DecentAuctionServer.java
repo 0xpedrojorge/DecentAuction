@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class DecentAuctionServer {
-
     private static final Logger logger = Logger.getLogger(DecentAuctionServer.class.getName());
 
     private Server server;
@@ -24,6 +23,7 @@ public class DecentAuctionServer {
                 .build()
                 .start();
         logger.info("Server started, listening on " + Standards.DEFAULT_PORT);
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             System.err.println("*** shutting down gRPC server since JVM is shutting down");
