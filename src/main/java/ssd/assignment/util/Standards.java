@@ -25,7 +25,7 @@ public class Standards {
     /*
     Bounds the amount of transactions per block
      */
-    public static final int MIN_TRANSACTIONS_PER_BLOCK = 1;
+    public static final int MIN_TRANSACTIONS_PER_BLOCK = 3;
     public static final int MAX_TRANSACTIONS_PER_BLOCK = 10;
 
     /*

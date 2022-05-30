@@ -22,7 +22,7 @@ public class DecentAuctionLedger {
 
     public DecentAuctionLedger(String[] args) {
 
-        //startBlockchain();
+        startBlockchain();
         startP2Pserver();
 
         //Create wallets:
@@ -75,12 +75,17 @@ public class DecentAuctionLedger {
 
     private void startP2Pserver() {
         final DecentAuctionServer server = new DecentAuctionServer();
-        try {
-            server.start();
-            server.blockUntilShutdown();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        Thread serverBlockedThread = new Thread(() -> {
+            try {
+                server.start();
+                server.blockUntilShutdown();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        });
+
+        serverBlockedThread.start();
     }
 
     public static void main(String[] args) {
