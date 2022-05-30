@@ -33,4 +33,19 @@ public class Standards {
      */
     public static final int NUMBER_OF_MINERS = 1;
 
+    /*
+    Sets the replication parameter for Kademlia
+     */
+    public static final int K = 20;
+
+    /*
+    Sets the concurrency parameter for Kademlia
+     */
+    public static final int ALPHA = 3;
+
+    /*
+    Sets the default node port
+     */
+    public static final int DEFAULT_PORT = 50051;
+
 }

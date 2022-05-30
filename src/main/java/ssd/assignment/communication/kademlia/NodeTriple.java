@@ -1,19 +1,21 @@
 package ssd.assignment.communication.kademlia;
 
 import com.google.gson.GsonBuilder;
+import lombok.Getter;
 
 import java.net.InetAddress;
 
-public class KademliaNode {
+@Getter
+public class NodeTriple {
 
     private final InetAddress ip;
     private final int port;
-    private final byte[] nodeId;
+    private final byte[] id;
 
-    public KademliaNode(InetAddress ip, int port, byte[] nodeId) {
+    public NodeTriple(InetAddress ip, int port, byte[] id) {
         this.ip = ip;
         this.port = port;
-        this.nodeId = nodeId;
+        this.id = id;
     }
 
     @Override

@@ -38,12 +38,11 @@ public class DecentAuctionClient {
         logger.info(response.getMessage());
     }
 
-    /**
-     * Greet server. If provided, the first element of {@code args} is the name to use in the
-     * greeting. The second argument is the target server.
+    /*
+    TODO replace main with constructor
      */
     public static void main(String[] args) throws Exception {
-        String user = "Pong";
+        String user = "Ping";
         // Access a service running on the local machine on port 50051
         String target = "localhost:50051";
         // Allow passing in the user and target strings as command line arguments

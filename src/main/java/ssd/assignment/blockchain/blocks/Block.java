@@ -3,7 +3,6 @@ package ssd.assignment.blockchain.blocks;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import ssd.assignment.blockchain.transactions.Transaction;
-import ssd.assignment.util.Helper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
