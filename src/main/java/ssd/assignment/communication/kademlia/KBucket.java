@@ -80,4 +80,11 @@ public class KBucket {
     public boolean contains(KNode n) {
         return nodes.contains(n);
     }
+
+    public LinkedList<KNode> getClosestNodes(byte[] requestorID, byte[] requestedID, int maxNodes) {
+
+            LinkedList<KNode> list= new LinkedList<>();
+
+        return list;
+    }
 }

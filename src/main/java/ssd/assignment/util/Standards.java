@@ -39,6 +39,11 @@ public class Standards {
     public static final int K = 20;
 
     /*
+    Sets the bit size ID
+     */
+    public static final int B = 160;
+
+    /*
     Sets the concurrency parameter for Kademlia
      */
     public static final int ALPHA = 3;
@@ -47,5 +52,10 @@ public class Standards {
     Sets the default node port
      */
     public static final int DEFAULT_PORT = 50051;
+
+    /*
+    Sets the maximun number os atempts to bootstrap a node
+    */
+    public static final int BOOTSTAP_ATEMPTS = 5;
 
 }

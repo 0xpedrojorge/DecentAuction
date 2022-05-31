@@ -79,10 +79,12 @@ public class DecentAuctionLedger {
         Generating a nodeId
          */
         Random random = new Random();
-        byte[] nodeId = new byte[160 / Byte.SIZE];
+        byte[] nodeId = new byte[Standards.B/ Byte.SIZE];
         random.nextBytes(nodeId);
 
         networkNode = new NetworkNode(nodeId, Standards.DEFAULT_PORT);
+
+
 
     }
 
