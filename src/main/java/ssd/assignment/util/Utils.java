@@ -1,6 +1,7 @@
 package ssd.assignment.util;
 
 import ssd.assignment.blockchain.transactions.Transaction;
+import ssd.assignment.communication.kademlia.KContact;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +23,10 @@ public class Utils {
     public static byte[] toByteArray(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
     }
+
+    /*
+    Blockchain auxiliar functions
+     */
 
     public static String getStringFromKey(Key key) {
         return toHexString(key.getEncoded());
@@ -50,11 +55,13 @@ public class Utils {
     }
 
     /*
-    Returns XOR distance between two Kademlia nodes
+    Kademlia auxiliar functions
      */
-    public static BigInteger getDistanceBetweenNodes(byte[] node1, byte[] node2) {
-        BigInteger xor1 = new BigInteger(1, node1);
-        BigInteger xor2 = new BigInteger(1, node2);
-        return xor1.xor(xor2);
+
+    public static BigInteger getXorDistance(byte[] node1, byte[] node2) {
+        BigInteger distance = new BigInteger(1, node1);
+        distance = distance.xor(new BigInteger(1, node2));
+
+        return distance;
     }
 }

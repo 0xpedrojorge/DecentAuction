@@ -3,12 +3,11 @@ package ssd.assignment.communication.grpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
-import ssd.assignment.communication.kademlia.NetworkNode;
+import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -17,12 +16,12 @@ public class DecentAuctionServer {
 
     private Server server;
 
-    public void start(NetworkNode node) throws IOException {
-        server = ServerBuilder.forPort(Standards.DEFAULT_PORT)
-                .addService(new P2PServerImpl(node))
+    public void start(NetworkNode localNode, int port) throws IOException {
+        server = ServerBuilder.forPort(port)
+                .addService(new P2PServerImpl(localNode))
                 .build()
                 .start();
-        logger.info("Server started, listening on " + Standards.DEFAULT_PORT);
+        logger.info("Server started, listening on " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
@@ -57,8 +56,8 @@ public class DecentAuctionServer {
 
         @Override
         public void ping(Ping req, StreamObserver<Pong> responseObserver) {
-            logger.info("Node " + Utils.toHexString(node.getNodeId()) + " hit by a " + req.getName());
-            Pong reply = Pong.newBuilder().setMessage("Pong").build();
+            logger.info("Node " + Utils.toHexString(node.getNodeId()) + " hit by a " + req.getNodeipAddress());
+            Pong reply = Pong.newBuilder().setNodeipAddress("Pong").build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }

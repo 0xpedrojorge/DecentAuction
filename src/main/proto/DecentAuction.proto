@@ -18,11 +18,15 @@ service P2PServer {
 }
 
 message Ping {
-  string name = 1;
+  string nodeipAddress = 1;
+  int32 nodePort = 2;
+  bytes nodeId = 3;
 }
 
 message Pong {
-  string message = 1;
+  string nodeipAddress = 1;
+  int32 nodePort = 2;
+  bytes nodeId = 3;
 }
 
 // Type of messages used in Kademlia protocol

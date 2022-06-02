@@ -3,11 +3,9 @@ package ssd.assignment;
 import lombok.Getter;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
-import ssd.assignment.communication.grpc.DecentAuctionServer;
-import ssd.assignment.communication.kademlia.NetworkNode;
+import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.util.Standards;
 
-import java.io.IOException;
 import java.util.Random;
 
 public class DecentAuctionLedger {
@@ -20,7 +18,7 @@ public class DecentAuctionLedger {
     public DecentAuctionLedger(String[] args) {
 
         startNetwork();
-        startBlockchain();
+        //startBlockchain();
 
         /*
         //Create wallets:

@@ -1,10 +1,15 @@
-package ssd.assignment.communication.kademlia;
+package ssd.assignment.communication;
 
 import lombok.Getter;
 import ssd.assignment.communication.grpc.DecentAuctionClientManager;
 import ssd.assignment.communication.grpc.DecentAuctionServer;
+import ssd.assignment.communication.kademlia.KContact;
+import ssd.assignment.communication.kademlia.KRoutingTable;
+import ssd.assignment.util.Standards;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @Getter
 public class NetworkNode {
@@ -24,7 +29,7 @@ public class NetworkNode {
         server = new DecentAuctionServer();
         Thread serverBlockedThread = new Thread(() -> {
             try {
-                server.start(this);
+                server.start(this, port);
                 server.blockUntilShutdown();
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -34,7 +39,13 @@ public class NetworkNode {
         serverBlockedThread.start();
         this.clientManager = new DecentAuctionClientManager();
 
-        this.KRoutingTable = new KRoutingTable(this);
+        try {
+            this.KRoutingTable = new KRoutingTable(
+                    new KContact(InetAddress.getLocalHost(), port, nodeId, System.currentTimeMillis())
+            );
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 

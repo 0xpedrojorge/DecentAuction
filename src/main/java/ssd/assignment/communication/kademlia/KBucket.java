@@ -1,39 +1,45 @@
 package ssd.assignment.communication.kademlia;
 
+import com.google.gson.GsonBuilder;
+import lombok.Getter;
+import lombok.ToString;
 import ssd.assignment.util.Standards;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class KBucket {
 
+    @Getter
     private final int depth;
-    private final LinkedList<KNode> nodes;
-    private final LinkedList<KNode> replacementCache;
+    private final ConcurrentLinkedDeque<KContact> contacts;
+    private final ConcurrentLinkedDeque<KContact> replacementCache;
 
     public KBucket(int depth) {
         this.depth = depth;
-        this.nodes = new LinkedList<>();
-        this.replacementCache = new LinkedList<>();
+        this.contacts = new ConcurrentLinkedDeque<>();
+        this.replacementCache = new ConcurrentLinkedDeque<>();
     }
 
-    public KBucket(int depth, List<KNode> nodes) {
-        this.depth = depth;
-        this.nodes = (LinkedList<KNode>) nodes;
-        this.replacementCache = new LinkedList<>();
-    }
-
-    public synchronized void insert(KNode newNode) {
+    /**
+     * Tries to insert a contact into a KBucket.
+     * Makes use of Optimized Contact Accounting.
+     *
+     * @param newContact the contact to be inserted
+     */
+    public synchronized void insert(KContact newContact) {
 
         /*
         If the sending node already exists in the recipient’s k-bucket,
         the recipient moves it to the tail of the list
          */
-        if (nodes.contains(newNode)) {
-            nodes.remove(newNode);
-            newNode.setLastSeen(System.currentTimeMillis());
-            newNode.resetStaleCount();
-            nodes.addLast(newNode);
+        if (contacts.contains(newContact)) {
+            contacts.remove(newContact);
+            newContact.setLastSeen(System.currentTimeMillis());
+            newContact.resetStaleCount();
+            contacts.addLast(newContact);
         } else {
 
             /*
@@ -41,18 +47,18 @@ public class KBucket {
             has fewer than k entries, then the recipient just inserts the new
             sender at the tail of the list.
              */
-            if (nodes.size() < Standards.K) {
-                nodes.addLast(newNode);
+            if (contacts.size() < Standards.KADEMLIA_K) {
+                contacts.addLast(newContact);
             } else {
                 /*
                 If the kbucket for a contact is already full with k entries, add new node to
                 the replacement cache and check for stale nodes in the kbucket
                  */
-                replacementCache.addLast(newNode);
+                insertIntoReplacementCache(newContact);
 
-                KNode stalest = null;
-                for (KNode n : nodes) {
-                    if (n.getStaleCount() >= 1) {
+                KContact stalest = null;
+                for (KContact n : contacts) {
+                    if (n.getStaleCount() >= Standards.KADEMLIA_STALENESS_LIMIT) {
                         if (stalest == null) {
                             stalest = n;
                         } else if (n.getStaleCount() > stalest.getStaleCount()){
@@ -60,24 +66,84 @@ public class KBucket {
                         }
                     }
                 }
+
                 /*
                 If bucket has stale nodes, replace the stalest with the first knode in the
                 replacement cache
                  */
                 if(stalest != null) {
-                    nodes.remove(stalest);
-                    nodes.addLast(replacementCache.removeFirst());
+                    contacts.remove(stalest);
+                    contacts.addLast(replacementCache.removeFirst());
                 }
+            }
+        }
+    }
+
+    /**
+     * Tries to remove a contact from a KBucket.
+     * Makes use of Optimized Contact Accounting.
+     *
+     * @param toRemove the contact to be removed
+     */
+    public synchronized void remove(KContact toRemove) {
+
+        if (contacts.contains(toRemove)) {
+
+            /*
+            If a k-bucket is not full or its replacement cache is empty, Kademlia
+            merely ﬂags stale contacts rather than remove them. This ensures, among
+            other things, that if a node’s own network connection goes down teporarily,
+            the node won’t completely void all of its k-buckets.
+             */
+            if (replacementCache.isEmpty() || contacts.size() < Standards.KADEMLIA_K) {
+                for (KContact c : contacts) {
+                    if (c.equals(toRemove)) c.incrementStaleCount();
+                }
+            } else {
+                contacts.remove(toRemove);
+                contacts.addLast(replacementCache.removeFirst());
+            }
+
+        }
+    }
+
+    public boolean contains(KContact contact) {
+        return contacts.contains(contact);
+    }
+
+    public int getSize() {
+        return contacts.size();
+    }
+
+    public List<KContact> getAllContacts() {
+        return new ArrayList<>(contacts);
+    }
+
+    private synchronized void insertIntoReplacementCache(KContact contact) {
+
+        if (replacementCache.contains(contact)) {
+            /*
+            If the contact is already in the replacement cache, we update its data
+            and move it to the end of the queue
+            */
+            replacementCache.remove(contact);
+            contact.setLastSeen(System.currentTimeMillis());
+            contact.resetStaleCount();
+            replacementCache.addLast(contact);
+        } else {
+            /*
+            Otherwise, we just add it to the queue, if there is space
+             */
+            if (replacementCache.size() < Standards.KADEMLIA_K) {
+                replacementCache.addLast(contact);
             }
         }
 
     }
 
-    private KNode remove(KNode n) {
-        return null;
+    @Override
+    public String toString() {
+        return new GsonBuilder().create().toJson(this);
     }
 
-    public boolean contains(KNode n) {
-        return nodes.contains(n);
-    }
 }

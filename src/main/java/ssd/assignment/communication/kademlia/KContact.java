@@ -8,17 +8,17 @@ import java.net.InetAddress;
 import java.util.Arrays;
 
 @Getter
-public class KNode {
+public class KContact {
 
     private final InetAddress ip;
     private final int port;
     private final byte[] id;
 
     @Setter
-    private long lastSeen;
-    private int staleCount;
+    private transient long lastSeen;
+    private transient int staleCount;
 
-    public KNode(InetAddress ip, int port, byte[] id, long lastSeen) {
+    public KContact(InetAddress ip, int port, byte[] id, long lastSeen) {
         this.ip = ip;
         this.port = port;
         this.id = id;
@@ -37,10 +37,10 @@ public class KNode {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof KNode) {
-            return ((KNode) o).getIp().equals(this.ip) &&
-                    ((KNode) o).getPort() == this.port &&
-                    Arrays.equals(((KNode) o).getId(), this.id);
+        if (o instanceof KContact) {
+            return ((KContact) o).getIp().equals(this.ip) &&
+                    ((KContact) o).getPort() == this.port &&
+                    Arrays.equals(((KContact) o).getId(), this.id);
         }
         return false;
     }

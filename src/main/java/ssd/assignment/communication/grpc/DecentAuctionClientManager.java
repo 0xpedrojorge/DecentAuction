@@ -45,7 +45,7 @@ public class DecentAuctionClientManager {
 
     public void ping(String name) {
         logger.info("Ping");
-        Ping request = Ping.newBuilder().setName(name).build();
+        Ping request = Ping.newBuilder().setNodeipAddress(name).build();
         Pong response;
         try {
             response = blockingStub.ping(request);
@@ -53,7 +53,7 @@ public class DecentAuctionClientManager {
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
             return;
         }
-        logger.info(response.getMessage());
+        logger.info(response.getNodeipAddress());
     }
 
     /*
