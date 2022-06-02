@@ -1,27 +1,29 @@
-package ssd.assignment.grpc;
+package ssd.assignment.communication.grpc;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
+import ssd.assignment.communication.kademlia.NetworkNode;
+import ssd.assignment.util.Standards;
+import ssd.assignment.util.Utils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class DecentAuctionServer {
-
     private static final Logger logger = Logger.getLogger(DecentAuctionServer.class.getName());
 
     private Server server;
 
-    private void start() throws IOException {
-        /* The port on which the server should run */
-        int port = 50051;
-        server = ServerBuilder.forPort(port)
-                .addService(new P2PServerImpl())
+    public void start(NetworkNode node) throws IOException {
+        server = ServerBuilder.forPort(Standards.DEFAULT_PORT)
+                .addService(new P2PServerImpl(node))
                 .build()
                 .start();
-        logger.info("Server started, listening on " + port);
+        logger.info("Server started, listening on " + Standards.DEFAULT_PORT);
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             System.err.println("*** shutting down gRPC server since JVM is shutting down");
@@ -40,31 +42,40 @@ public class DecentAuctionServer {
         }
     }
 
-    /**
-     * Await termination on the main thread since the grpc library uses daemon threads.
-     */
-    private void blockUntilShutdown() throws InterruptedException {
+    public void blockUntilShutdown() throws InterruptedException {
         if (server != null) {
             server.awaitTermination();
         }
     }
 
-    /**
-     * Main launches the server from the command line.
-     */
-    public static void main(String[] args) throws IOException, InterruptedException {
-        final DecentAuctionServer server = new DecentAuctionServer();
-        server.start();
-        server.blockUntilShutdown();
-    }
-
     static class P2PServerImpl extends P2PServerGrpc.P2PServerImplBase {
+        NetworkNode node;
+
+        public P2PServerImpl(NetworkNode node) {
+            this.node = node;
+        }
 
         @Override
         public void ping(Ping req, StreamObserver<Pong> responseObserver) {
-            Pong reply = Pong.newBuilder().setMessage(req.getName()).build();
+            logger.info("Node " + Utils.toHexString(node.getNodeId()) + " hit by a " + req.getName());
+            Pong reply = Pong.newBuilder().setMessage("Pong").build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
+        }
+
+        @Override
+        public void findNode(exampleRequest request, StreamObserver<exampleReply> responseObserver) {
+            super.findNode(request, responseObserver);
+        }
+
+        @Override
+        public void store(exampleRequest request, StreamObserver<exampleReply> responseObserver) {
+            super.store(request, responseObserver);
+        }
+
+        @Override
+        public void findValue(exampleRequest request, StreamObserver<exampleReply> responseObserver) {
+            super.findValue(request, responseObserver);
         }
     }
 

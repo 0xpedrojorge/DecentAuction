@@ -1,7 +1,7 @@
 package ssd.assignment.blockchain.miners;
 
 import ssd.assignment.blockchain.blocks.Block;
-import ssd.assignment.util.Helper;
+import ssd.assignment.util.Utils;
 import ssd.assignment.util.Standards;
 
 public class Miner extends Thread {
@@ -19,8 +19,8 @@ public class Miner extends Thread {
     }
 
     public void run() {
-        block.getHeader().merkleRoot = Helper.getMerkleRoot(block.getTransactions());
-        String target = Helper.getDificultyString(Standards.MINING_DIFFICULTY);
+        block.getHeader().merkleRoot = Utils.getMerkleRoot(block.getTransactions());
+        String target = Utils.getDifficultyString(Standards.MINING_DIFFICULTY);
         while(!block.getHeader().hash.substring( 0, Standards.MINING_DIFFICULTY).equals(target)) {
             if (isInterrupted()) break;
 

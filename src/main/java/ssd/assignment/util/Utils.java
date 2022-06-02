@@ -6,9 +6,8 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.ArrayList;
-import java.util.Base64;
 
-public class Helper {
+public class Utils {
 
     public static String toHexString(byte[] bytes) {
         StringBuilder builder = new StringBuilder();
@@ -43,11 +42,19 @@ public class Helper {
             count = treeLayer.size();
             previousTreeLayer = treeLayer;
         }
-        String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
-        return merkleRoot;
+        return (treeLayer.size() == 1) ? treeLayer.get(0) : "";
     }
 
-    public static String getDificultyString(int difficulty) {
+    public static String getDifficultyString(int difficulty) {
         return new String(new char[difficulty]).replace('\0', '0');
+    }
+
+    /*
+    Returns XOR distance between two Kademlia nodes
+     */
+    public static BigInteger getDistanceBetweenNodes(byte[] node1, byte[] node2) {
+        BigInteger xor1 = new BigInteger(1, node1);
+        BigInteger xor2 = new BigInteger(1, node2);
+        return xor1.xor(xor2);
     }
 }

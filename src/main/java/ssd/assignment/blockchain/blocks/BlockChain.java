@@ -6,7 +6,7 @@ import ssd.assignment.blockchain.TransactionPool;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxInput;
 import ssd.assignment.blockchain.transactions.TxOutput;
-import ssd.assignment.util.Helper;
+import ssd.assignment.util.Utils;
 import ssd.assignment.util.Standards;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class BlockChain {
     //TODO change this up
     public boolean isValid() {
         Block currentBlock, previousBlock;
-        String target = Helper.getDificultyString(Standards.MINING_DIFFICULTY);
+        String target = Utils.getDifficultyString(Standards.MINING_DIFFICULTY);
         HashMap<String,TxOutput> tempUTXOs = new HashMap<>(); //a temporary working list of unspent transactions at a given block state.
         tempUTXOs.put(blocks.get(0).getTransactions().get(0).getOutputs().get(0).id, blocks.get(0).getTransactions().get(0).getOutputs().get(0));
 

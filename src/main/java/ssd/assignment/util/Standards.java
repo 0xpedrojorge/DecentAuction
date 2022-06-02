@@ -25,12 +25,27 @@ public class Standards {
     /*
     Bounds the amount of transactions per block
      */
-    public static final int MIN_TRANSACTIONS_PER_BLOCK = 1;
+    public static final int MIN_TRANSACTIONS_PER_BLOCK = 3;
     public static final int MAX_TRANSACTIONS_PER_BLOCK = 10;
 
     /*
     Sets the number of miners
      */
     public static final int NUMBER_OF_MINERS = 1;
+
+    /*
+    Sets the replication parameter for Kademlia
+     */
+    public static final int K = 20;
+
+    /*
+    Sets the concurrency parameter for Kademlia
+     */
+    public static final int ALPHA = 3;
+
+    /*
+    Sets the default node port
+     */
+    public static final int DEFAULT_PORT = 50051;
 
 }

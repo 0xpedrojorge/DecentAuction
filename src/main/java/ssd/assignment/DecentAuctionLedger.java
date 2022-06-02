@@ -1,27 +1,28 @@
 package ssd.assignment;
 
 import lombok.Getter;
-import ssd.assignment.blockchain.Wallet;
-import ssd.assignment.blockchain.blocks.Block;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
-import ssd.assignment.blockchain.transactions.Transaction;
-import ssd.assignment.blockchain.transactions.TxOutput;
+import ssd.assignment.communication.grpc.DecentAuctionServer;
+import ssd.assignment.communication.kademlia.NetworkNode;
+import ssd.assignment.util.Standards;
 
-import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
-
+import java.io.IOException;
+import java.util.Random;
 
 public class DecentAuctionLedger {
     @Getter
     private static BlockChain blockchain;
     private MiningManager miningManager;
 
+    private NetworkNode networkNode;
 
     public DecentAuctionLedger(String[] args) {
 
+        startNetwork();
         startBlockchain();
 
+        /*
         //Create wallets:
         Wallet walletA = new Wallet();
         Wallet walletB = new Wallet();
@@ -63,11 +64,26 @@ public class DecentAuctionLedger {
 
         //System.out.println(blockchain.toPrettyString());
 
+         */
+
     }
 
     private void startBlockchain() {
         blockchain = new BlockChain();
         miningManager = new MiningManager(blockchain);
+    }
+
+    private void startNetwork() {
+
+        /*
+        Generating a nodeId
+         */
+        Random random = new Random();
+        byte[] nodeId = new byte[160 / Byte.SIZE];
+        random.nextBytes(nodeId);
+
+        networkNode = new NetworkNode(nodeId, Standards.DEFAULT_PORT);
+
     }
 
     public static void main(String[] args) {

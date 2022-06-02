@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import ssd.assignment.util.Crypto;
 import ssd.assignment.util.CustomExclusionStrategy;
-import ssd.assignment.util.Helper;
+import ssd.assignment.util.Utils;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -31,12 +31,12 @@ public class Transaction {
     }
 
     public void generateSignature(PrivateKey privateKey) {
-        String data = Helper.getStringFromKey(sender) + Helper.getStringFromKey(reciepient) + amount;
+        String data = Utils.getStringFromKey(sender) + Utils.getStringFromKey(reciepient) + amount;
         signature = Crypto.sign(data, privateKey);
     }
 
     public boolean verifiySignature() {
-        String data = Helper.getStringFromKey(sender) + Helper.getStringFromKey(reciepient) + amount;
+        String data = Utils.getStringFromKey(sender) + Utils.getStringFromKey(reciepient) + amount;
         return Crypto.verifySignature(data, signature, sender);
     }
 

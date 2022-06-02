@@ -7,7 +7,7 @@
 }
 
 application {
-    mainClass = 'ssd.assignment.DecentAuction'
+    mainClass = 'ssd.assignment.DecentAuctionLedger'
     applicationDefaultJvmArgs = ["--add-opens java.base/java.time=ALL-UNNAMED"]
 }
 
@@ -30,7 +30,7 @@ version '1.0-SNAPSHOT'
 
  jar {
      manifest {
-         attributes 'Main-Class': 'ssd.assignment.DecentAuction'
+         attributes 'Main-Class': 'ssd.assignment.DecentAuctionLedger'
      }
  }
 

@@ -21,7 +21,7 @@ public abstract class Crypto {
         try {
             Signature sign = Signature.getInstance(Standards.SIGNING_ALGORITHM);
             sign.initSign(privateKey);
-            sign.update(Helper.toByteArray(message));
+            sign.update(Utils.toByteArray(message));
             s = sign.sign();
         } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();
@@ -34,7 +34,7 @@ public abstract class Crypto {
         try {
             Signature sign = Signature.getInstance(Standards.SIGNING_ALGORITHM);
             sign.initVerify(publicKey);
-            sign.update(Helper.toByteArray(message));
+            sign.update(Utils.toByteArray(message));
             isVerified = sign.verify(signature);
         } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();
@@ -46,12 +46,12 @@ public abstract class Crypto {
         byte[] bytes = null;
         try {
             MessageDigest digest = MessageDigest.getInstance(Standards.DIGEST_ALGORITHM);
-            bytes = digest.digest(Helper.toByteArray(data));
+            bytes = digest.digest(Utils.toByteArray(data));
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         assert bytes != null;
-        return Helper.toHexString(bytes);
+        return Utils.toHexString(bytes);
     }
 
 
