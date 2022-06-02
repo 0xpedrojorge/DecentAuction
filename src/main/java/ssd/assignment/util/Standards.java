@@ -34,6 +34,11 @@ public class Standards {
     public static final int NUMBER_OF_MINERS = 1;
 
     /*
+    Sets the ID byte size for Kademlia
+     */
+    public static final int KADEMLIA_ID_BIT_SIZE = 160;
+
+    /*
     Sets the replication parameter for Kademlia
      */
     public static final int K = 20;
@@ -47,6 +52,11 @@ public class Standards {
     Sets the concurrency parameter for Kademlia
      */
     public static final int ALPHA = 3;
+
+    /*
+        Sets the maximun number os atempts to bootstrap a node
+        */
+    public static final int BOOTSTAP_ATEMPTS = 5;
 
     /*
     Sets the default node port
