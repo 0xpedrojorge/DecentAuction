@@ -51,28 +51,39 @@ public class DecentAuctionServer {
     }
 
     static class NetworkServerImpl extends NetworkServerGrpc.NetworkServerImplBase {
-        NetworkNode node;
+        NetworkNode localNode;
 
-        public NetworkServerImpl(NetworkNode node) {
-            this.node = node;
+        public NetworkServerImpl(NetworkNode localNode) {
+            this.localNode = localNode;
         }
 
         @Override
         public void ping(ProtoNode req, StreamObserver<ProtoNode> responseObserver) {
             handleIncomingContact(req);
 
-            ProtoNode reply = ProtoNode.newBuilder()
-                    .setNodeIpAddress(Utils.getLocalAddressAsString())
-                    .setNodePort(node.getPort())
-                    .setNodeId(ByteString.copyFrom(node.getNodeId()))
-                    .build();
+            ProtoNode reply = buildSelf();
+
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
 
         @Override
-        public void store(exampleRequest req, StreamObserver<exampleReply> responseObserver) {
-            super.store(req, responseObserver);
+        public void store(ProtoContent req, StreamObserver<ProtoContent> responseObserver) {
+            handleIncomingContact(req.getSendingNode());
+
+            localNode.getDht().storePair(req.getKey().toByteArray(),
+                    req.getValue().toByteArray(), req.getOriginalPublisherId().toByteArray());
+            ProtoNode self = buildSelf();
+
+            ProtoContent reply = ProtoContent.newBuilder()
+                    .setSendingNode(self)
+                    .setKey(req.getKey())
+                    .setValue(req.getValue())
+                    .build();
+
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+
         }
 
         @Override
@@ -82,14 +93,16 @@ public class DecentAuctionServer {
             /*
             Get the k closest contacts to the target that I have stored
              */
-            for (KContact c : node.getRoutingTable().getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K)) {
-                ProtoNode foundProtoNode = buildOffKContact(c);
-                FoundNode foundNode = FoundNode.newBuilder()
-                        .setFoundNode(foundProtoNode)
+            for (KContact c : localNode.getRoutingTable()
+                    .getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K)) {
+
+                ProtoNode protoNode = buildOffKContact(c);
+                FoundNode protoFoundNode = FoundNode.newBuilder()
+                        .setSendingNode(protoNode)
                         .setLastSeen(c.getLastSeen())
                         .build();
 
-                responseObserver.onNext(foundNode);
+                responseObserver.onNext(protoFoundNode);
             }
             responseObserver.onCompleted();
 
@@ -97,17 +110,49 @@ public class DecentAuctionServer {
 
         @Override
         public void findValue(ProtoTarget req, StreamObserver<FoundValue> responseObserver) {
-            super.findValue(req, responseObserver);
+            handleIncomingContact(req.getSendingNode());
+
+            byte[] target = req.getTarget().toByteArray();
+            byte[] toReturn = localNode.getDht().getValueByKey(target);
+
+            ProtoNode self = buildSelf();
+            if (toReturn != null) {
+                /*
+                If the target key was found, return its value
+                 */
+                FoundValue protoFoundValue = FoundValue.newBuilder()
+                        .setSendingNode(self)
+                        .setDataType(DataType.FOUND_VALUE)
+                        .setKey(ByteString.copyFrom(target))
+                        .setValue(ByteString.copyFrom(toReturn))
+                        .build();
+                responseObserver.onNext(protoFoundValue);
+            } else {
+                /*
+                Get the k closest contacts to the target that I have stored
+                */
+                for (KContact c : localNode.getRoutingTable()
+                        .getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K)) {
+
+                    FoundValue protoFoundValue = FoundValue.newBuilder()
+                            .setSendingNode(self)
+                            .setDataType(DataType.FOUND_NODES)
+                            .setKey(ByteString.copyFrom(c.getId()))
+                            .build();
+
+                    responseObserver.onNext(protoFoundValue);
+                }
+            }
+            responseObserver.onCompleted();
         }
 
         private void handleIncomingContact(GeneratedMessageV3 req) {
             Thread t = new Thread(() -> {
                 if (req instanceof ProtoNode) {
-                    System.out.println("Received message from " + Utils.toHexString(((ProtoNode) req).getNodeId().toByteArray()) + ", adding to kBucket");
                     KContact incomingContact = new KContact(Utils.getAddressFromString(((ProtoNode) req).getNodeIpAddress()),
                             ((ProtoNode) req).getNodePort(), ((ProtoNode) req).getNodeId().toByteArray(), System.currentTimeMillis());
 
-                    node.getRoutingTable().insert(incomingContact);
+                    localNode.getRoutingTable().insert(incomingContact);
                 }
             });
             t.start();
@@ -118,6 +163,14 @@ public class DecentAuctionServer {
                     .setNodeIpAddress(contact.getIp().getHostAddress())
                     .setNodePort(contact.getPort())
                     .setNodeId(ByteString.copyFrom(contact.getId()))
+                    .build();
+        }
+
+        private ProtoNode buildSelf() {
+            return ProtoNode.newBuilder()
+                    .setNodeIpAddress(Utils.getLocalAddressAsString())
+                    .setNodePort(localNode.getPort())
+                    .setNodeId(ByteString.copyFrom(localNode.getNodeId()))
                     .build();
         }
     }
