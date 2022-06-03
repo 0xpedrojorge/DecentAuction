@@ -1,8 +1,11 @@
 package ssd.assignment.util;
 
 import ssd.assignment.blockchain.transactions.Transaction;
+import ssd.assignment.communication.kademlia.KContact;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.ArrayList;
@@ -22,6 +25,10 @@ public class Utils {
     public static byte[] toByteArray(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
     }
+
+    /*
+    Blockchain auxiliar functions
+     */
 
     public static String getStringFromKey(Key key) {
         return toHexString(key.getEncoded());
@@ -50,11 +57,46 @@ public class Utils {
     }
 
     /*
-    Returns XOR distance between two Kademlia nodes
+    Kademlia auxiliar functions
      */
-    public static BigInteger getDistanceBetweenNodes(byte[] node1, byte[] node2) {
-        BigInteger xor1 = new BigInteger(1, node1);
-        BigInteger xor2 = new BigInteger(1, node2);
-        return xor1.xor(xor2);
+
+    public static BigInteger getXorDistance(byte[] node1, byte[] node2) {
+        BigInteger distance = new BigInteger(1, node1);
+        distance = distance.xor(new BigInteger(1, node2));
+
+        return distance;
+    }
+
+    public static InetAddress getLocalAddress() {
+        InetAddress localIpAddress;
+        try {
+            localIpAddress = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return localIpAddress;
+    }
+
+    public static String getLocalAddressAsString() {
+        String localIpAddress;
+        try {
+            localIpAddress = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return localIpAddress;
+    }
+
+    public static InetAddress getAddressFromString(String string) {
+        InetAddress address;
+        try {
+            address = InetAddress.getByName(string);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return address;
     }
 }

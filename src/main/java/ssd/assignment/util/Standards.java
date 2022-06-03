@@ -41,21 +41,26 @@ public class Standards {
     /*
     Sets the replication parameter for Kademlia
      */
-    public static final int K = 20;
+    public static final int KADEMLIA_K = 20;
 
     /*
     Sets the concurrency parameter for Kademlia
      */
-    public static final int ALPHA = 3;
+    public static final int KADEMLIA_ALPHA = 3;
 
     /*
-        Sets the maximun number os atempts to bootstrap a node
-        */
+    Sets the staleness limit for Kademlia
+     */
+    public static final int KADEMLIA_STALENESS_LIMIT = 5;
+
+    /*
+    Sets the maximun number os atempts to bootstrap a node
+     */
     public static final int BOOTSTAP_ATEMPTS = 5;
 
     /*
     Sets the default node port
      */
-    public static final int DEFAULT_PORT = 50051;
+    public static final int DEFAULT_PORT = 50050;
 
 }

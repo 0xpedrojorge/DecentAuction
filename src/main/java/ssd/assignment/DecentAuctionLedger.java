@@ -3,12 +3,15 @@ package ssd.assignment;
 import lombok.Getter;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
-import ssd.assignment.communication.grpc.DecentAuctionServer;
-import ssd.assignment.communication.kademlia.NetworkNode;
+import ssd.assignment.communication.NetworkNode;
+import ssd.assignment.communication.kademlia.KContact;
+import ssd.assignment.communication.operations.PingOperation;
 import ssd.assignment.util.Standards;
 
-import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class DecentAuctionLedger {
     @Getter
@@ -20,7 +23,7 @@ public class DecentAuctionLedger {
     public DecentAuctionLedger(String[] args) {
 
         startNetwork();
-        startBlockchain();
+        //startBlockchain();
 
         /*
         //Create wallets:
@@ -74,15 +77,6 @@ public class DecentAuctionLedger {
     }
 
     private void startNetwork() {
-
-        /*
-        Generating a nodeId
-         */
-        Random random = new Random();
-        byte[] nodeId = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(nodeId);
-
-        networkNode = new NetworkNode(nodeId, Standards.DEFAULT_PORT);
 
     }
 
