@@ -61,6 +61,6 @@ public class Standards {
     /*
     Sets the default node port
      */
-    public static final int DEFAULT_PORT = 50051;
+    public static final int DEFAULT_PORT = 50050;
 
 }

@@ -17,7 +17,7 @@ public class DecentAuctionLedger {
 
     private NetworkNode networkNode;
 
-    public DecentAuctionLedger(String[] args) throws InterruptedException {
+    public DecentAuctionLedger(String[] args) {
 
         startNetwork();
         //startBlockchain();
@@ -73,24 +73,30 @@ public class DecentAuctionLedger {
         miningManager = new MiningManager(blockchain);
     }
 
-    private void startNetwork() throws InterruptedException {
-
-        /*
-        Generating a nodeId
-         */
+    private void startNetwork() {
         Random random = new Random();
-        byte[] nodeId = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(nodeId);
+        byte[] node1Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
+        random.nextBytes(node1Id);
+        byte[] node2Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
+        random.nextBytes(node2Id);
 
-        networkNode = new NetworkNode(nodeId, Standards.DEFAULT_PORT);
+        NetworkNode node1 = new NetworkNode(node1Id, 50050);
+        NetworkNode node2 = new NetworkNode(node2Id, 50051);
 
-        TimeUnit.SECONDS.sleep(2);
-        PingOperation op = new PingOperation(networkNode, networkNode.getNodeId());
-        op.execute();
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
+        PingOperation op1 = new PingOperation(node1, node1.getNodeId());
+        op1.execute();
+
+        PingOperation op2 = new PingOperation(node2, node2.getNodeId());
+        op2.execute();
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         new DecentAuctionLedger(args);
     }
 }
