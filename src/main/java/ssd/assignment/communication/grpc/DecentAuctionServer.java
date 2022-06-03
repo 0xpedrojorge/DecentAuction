@@ -1,10 +1,10 @@
 package ssd.assignment.communication.grpc;
 
+import com.google.protobuf.ByteString;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import ssd.assignment.communication.NetworkNode;
-import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class DecentAuctionServer {
 
     public void start(NetworkNode localNode, int port) throws IOException {
         server = ServerBuilder.forPort(port)
-                .addService(new P2PServerImpl(localNode))
+                .addService(new NetworkServerImpl(localNode))
                 .build()
                 .start();
         logger.info("Server started, listening on " + port);
@@ -47,17 +47,18 @@ public class DecentAuctionServer {
         }
     }
 
-    static class P2PServerImpl extends P2PServerGrpc.P2PServerImplBase {
+    static class NetworkServerImpl extends NetworkServerGrpc.NetworkServerImplBase {
         NetworkNode node;
 
-        public P2PServerImpl(NetworkNode node) {
+        public NetworkServerImpl(NetworkNode node) {
             this.node = node;
         }
 
         @Override
         public void ping(Ping req, StreamObserver<Pong> responseObserver) {
-            logger.info("Node " + Utils.toHexString(node.getNodeId()) + " hit by a " + req.getNodeipAddress());
-            Pong reply = Pong.newBuilder().setNodeipAddress("Pong").build();
+            Pong reply = Pong.newBuilder()
+                    .setNodeId(ByteString.copyFrom(node.getNodeId()))
+                    .build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }

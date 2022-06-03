@@ -4,9 +4,11 @@ import lombok.Getter;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
 import ssd.assignment.communication.NetworkNode;
+import ssd.assignment.communication.operations.PingOperation;
 import ssd.assignment.util.Standards;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class DecentAuctionLedger {
     @Getter
@@ -15,7 +17,7 @@ public class DecentAuctionLedger {
 
     private NetworkNode networkNode;
 
-    public DecentAuctionLedger(String[] args) {
+    public DecentAuctionLedger(String[] args) throws InterruptedException {
 
         startNetwork();
         //startBlockchain();
@@ -71,7 +73,7 @@ public class DecentAuctionLedger {
         miningManager = new MiningManager(blockchain);
     }
 
-    private void startNetwork() {
+    private void startNetwork() throws InterruptedException {
 
         /*
         Generating a nodeId
@@ -82,9 +84,13 @@ public class DecentAuctionLedger {
 
         networkNode = new NetworkNode(nodeId, Standards.DEFAULT_PORT);
 
+        TimeUnit.SECONDS.sleep(2);
+        PingOperation op = new PingOperation(networkNode, networkNode.getNodeId());
+        op.execute();
+
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         new DecentAuctionLedger(args);
     }
 }
