@@ -2,11 +2,10 @@ package ssd.assignment.communication.kademlia;
 
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import lombok.ToString;
 import ssd.assignment.util.Standards;
+import ssd.assignment.util.Utils;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -30,12 +29,13 @@ public class KBucket {
      * @param newContact the contact to be inserted
      */
     public synchronized void insert(KContact newContact) {
-
+        System.out.println("Trying to insert " + Utils.toHexString(newContact.getId()) + " at depth " + depth);
         /*
         If the sending node already exists in the recipient’s k-bucket,
         the recipient moves it to the tail of the list
          */
         if (contacts.contains(newContact)) {
+            System.out.println(Utils.toHexString(newContact.getId()) + "is already in bucket, moving to tail");
             contacts.remove(newContact);
             newContact.setLastSeen(System.currentTimeMillis());
             newContact.resetStaleCount();
@@ -91,7 +91,7 @@ public class KBucket {
 
             /*
             If a k-bucket is not full or its replacement cache is empty, Kademlia
-            merely ﬂags stale contacts rather than remove them. This ensures, among
+            merely flags stale contacts rather than remove them. This ensures, among
             other things, that if a node’s own network connection goes down teporarily,
             the node won’t completely void all of its k-buckets.
              */

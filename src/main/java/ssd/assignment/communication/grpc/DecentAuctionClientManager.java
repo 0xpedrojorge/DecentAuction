@@ -6,8 +6,14 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
+import ssd.assignment.communication.operations.LookupOperation;
+import ssd.assignment.communication.operations.PingOperation;
 import ssd.assignment.util.Utils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -92,47 +98,80 @@ public class DecentAuctionClientManager {
     }
 
 
-    public void ping(NetworkNode localNode, KContact contact) {
+    public void ping(NetworkNode localNode, KContact recipient, PingOperation operation) {
         logger.info("Ping from " + Utils.toHexString(localNode.getNodeId()));
-        NetworkServerGrpc.NetworkServerStub contactStub = newStub(contact);
+        NetworkServerGrpc.NetworkServerStub stub = newStub(recipient);
 
-        Ping request = Ping.newBuilder()
-                .setNodeId(ByteString.copyFrom(localNode.getNodeId()))
+        ProtoNode req = buildSelf(localNode);
+
+        stub.ping(req, new StreamObserver<ProtoNode>() {
+            @Override
+            public void onNext(ProtoNode res) {
+                logger.info("Pong from " + Utils.toHexString(res.getNodeId().toByteArray()));
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                t.printStackTrace();
+                voidChannel(recipient);
+                operation.handleFailedRequest(recipient);
+            }
+
+            @Override
+            public void onCompleted() {
+                operation.handleSuccessfulRequest(recipient);
+            }
+        });
+    }
+
+    public void lookup(NetworkNode localNode, KContact recipient, LookupOperation operation, byte[] target) {
+        logger.info("Starting lookup from " + Utils.toHexString(localNode.getNodeId()));
+        NetworkServerGrpc.NetworkServerStub stub = newStub(recipient);
+
+        ProtoNode self = buildSelf(localNode);
+
+        ProtoTarget protoTarget = ProtoTarget.newBuilder()
+                .setSendingNode(self)
+                .setTarget(ByteString.copyFrom(target))
                 .build();
 
-        contactStub.ping(request,
-                new StreamObserver<Pong>() {
-                    @Override
-                    public void onNext(Pong value) {
-                        logger.info("Pong from " + Utils.toHexString(value.getNodeId().toByteArray()));
-                        localNode.getKRoutingTable().insert(contact);
-                    }
+        List<KContact> returnedContacts = new ArrayList<>();
 
-                    @Override
-                    public void onError(Throwable t) {
-                        t.printStackTrace();
-                        voidChannel(contact);
-                        localNode.getKRoutingTable().warnUnresponsiveContact(contact);
-                    }
+        stub.findNode(protoTarget, new StreamObserver<FoundNode>() {
+            @Override
+            public void onNext(FoundNode value) {
+                InetAddress foundAddress;
+                try {
+                    foundAddress = InetAddress.getByName(value.getFoundNode().getNodeIpAddress());
+                } catch (UnknownHostException e) {
+                    throw new RuntimeException(e);
+                }
+                int foundPort = value.getFoundNode().getNodePort();
+                byte[] foundId = value.getFoundNode().getNodeId().toByteArray();
+                long foundLastSeen = value.getLastSeen();
+                returnedContacts.add(new KContact(foundAddress, foundPort, foundId, foundLastSeen));
+            }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                });
+            @Override
+            public void onError(Throwable t) {
+                t.printStackTrace();
+                voidChannel(recipient);
+                operation.handleFailedRequest(recipient);
+            }
 
+            @Override
+            public void onCompleted() {
+                operation.handleSuccessfulRequest(recipient, returnedContacts);
+            }
+        });
+    }
 
-        /*
-        Ping request = Ping.newBuilder().setNodeipAddress(l).build();
-        Pong response;
-        try {
-            response = blockingStub.ping(request);
-        } catch (StatusRuntimeException e) {
-            logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return;
-        }
-        logger.info(response.getNodeipAddress());
-
-         */
+    private ProtoNode buildSelf(NetworkNode self) {
+        return ProtoNode.newBuilder()
+                .setNodeIpAddress(Utils.getLocalAddressAsString())
+                .setNodePort(self.getPort())
+                .setNodeId(ByteString.copyFrom(self.getNodeId()))
+                .build();
     }
 
 }

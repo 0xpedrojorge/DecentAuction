@@ -20,13 +20,21 @@ public class PingOperation implements Operation {
     @Override
     public void execute() {
         List<KContact> kClosestNodes =
-                localNode.getKRoutingTable().getNClosestContacts(destinationNodeId, Standards.KADEMLIA_K);
+                localNode.getRoutingTable().getNClosestContacts(destinationNodeId, Standards.KADEMLIA_K);
 
         for (KContact contact : kClosestNodes) {
             if (Arrays.equals(contact.getId(), destinationNodeId)) {
-                localNode.getClientManager().ping(localNode, contact);
+                localNode.getClientManager().ping(localNode, contact, this);
                 return;
             }
         }
+    }
+
+    public void handleFailedRequest(KContact contact){
+        localNode.getRoutingTable().warnUnresponsiveContact(contact);
+    }
+
+    public void handleSuccessfulRequest(KContact contact) {
+        localNode.getRoutingTable().insert(contact);
     }
 }

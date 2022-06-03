@@ -3,6 +3,7 @@ package ssd.assignment.communication.kademlia;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.Setter;
+import ssd.assignment.util.Utils;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -47,7 +48,9 @@ public class KContact {
 
     @Override
     public String toString() {
-        return new GsonBuilder().create().toJson(this);
+        return "{\"ip\":" + ip.getHostAddress() + "," +
+                "\"port\":" + port + ",\"id\":" + Utils.toHexString(id) +
+                "}";
     }
 
 }

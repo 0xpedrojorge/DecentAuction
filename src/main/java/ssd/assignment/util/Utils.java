@@ -4,6 +4,8 @@ import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.communication.kademlia.KContact;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.ArrayList;
@@ -63,5 +65,38 @@ public class Utils {
         distance = distance.xor(new BigInteger(1, node2));
 
         return distance;
+    }
+
+    public static InetAddress getLocalAddress() {
+        InetAddress localIpAddress;
+        try {
+            localIpAddress = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return localIpAddress;
+    }
+
+    public static String getLocalAddressAsString() {
+        String localIpAddress;
+        try {
+            localIpAddress = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return localIpAddress;
+    }
+
+    public static InetAddress getAddressFromString(String string) {
+        InetAddress address;
+        try {
+            address = InetAddress.getByName(string);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return address;
     }
 }

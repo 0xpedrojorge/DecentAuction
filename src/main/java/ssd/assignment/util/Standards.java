@@ -54,8 +54,8 @@ public class Standards {
     public static final int KADEMLIA_STALENESS_LIMIT = 5;
 
     /*
-        Sets the maximun number os atempts to bootstrap a node
-        */
+    Sets the maximun number os atempts to bootstrap a node
+     */
     public static final int BOOTSTAP_ATEMPTS = 5;
 
     /*

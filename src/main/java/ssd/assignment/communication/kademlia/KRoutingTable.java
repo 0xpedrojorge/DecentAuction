@@ -75,8 +75,10 @@ public class KRoutingTable {
 
         List<KContact> nClosestContacts = new ArrayList<>();
         for (int i = 0; i < n; i++) {
-            nClosestContacts.add(sortedContacts.first());
+            if (!sortedContacts.isEmpty())
+                nClosestContacts.add(sortedContacts.pollFirst());
         }
+
         return nClosestContacts;
     }
 
@@ -90,6 +92,14 @@ public class KRoutingTable {
 
     public void warnUnresponsiveContact(KContact c) {
         kBuckets[getBucketNumberForNodeId(c.getId())].remove(c);
+    }
+
+    public List<KContact> getAllContacts() {
+        List<KContact> contacts = new ArrayList<>();
+        for (KBucket bucket : kBuckets) {
+            contacts.addAll(bucket.getAllContacts());
+        }
+        return contacts;
     }
 
 }
