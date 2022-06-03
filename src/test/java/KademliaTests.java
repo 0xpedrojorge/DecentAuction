@@ -10,7 +10,6 @@ import ssd.assignment.util.Utils;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Random;
-import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
 public class KademliaTests {
@@ -33,16 +32,10 @@ public class KademliaTests {
 
         try {
             node2AsContact = new KContact(InetAddress.getLocalHost(), node2.getPort(), node2.getNodeId(), System.currentTimeMillis());
-            TimeUnit.SECONDS.sleep(2);
             node1.bootstrap(node2AsContact);
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException | UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
-
-        System.out.println("Node1: " + node1.getRoutingTable().getAllContacts());
-        System.out.println("Node2: " + node2.getRoutingTable().getAllContacts());
-
 
         PingOperation op1 = new PingOperation(node1, node2Id);
         op1.execute();
@@ -50,11 +43,8 @@ public class KademliaTests {
         PingOperation op2 = new PingOperation(node2, node1Id);
         op2.execute();
 
-        try {
-            TimeUnit.SECONDS.sleep(3);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println("Node1: " + node1.getRoutingTable().getAllContacts());
+        System.out.println("Node2: " + node2.getRoutingTable().getAllContacts());
     }
 
     @Test
@@ -75,12 +65,11 @@ public class KademliaTests {
 
         try {
             node2AsContact = new KContact(InetAddress.getLocalHost(), node2.getPort(), node2.getNodeId(), System.currentTimeMillis());
-            TimeUnit.SECONDS.sleep(2);
             node1.bootstrap(node2AsContact);
-            TimeUnit.SECONDS.sleep(6);
             System.out.println("Bootstrap is over");
             StoredData someData = new StoredData(Utils.toByteArray("A KEY"), Utils.toByteArray("A VALUE"), node1.getNodeId());
             System.out.println("Stored key: " + Utils.toHexString(someData.getKey()));
+            System.out.println("Stored value: " + Utils.toHexString(someData.getValue()));
             StoreOperation op1 = new StoreOperation(node1, someData);
             op1.execute();
             TimeUnit.SECONDS.sleep(3);
@@ -91,16 +80,15 @@ public class KademliaTests {
 
         System.out.println(node2.getDht().getStoredPairs().size());
 
-        for(String key : node2.getDht().getStoredPairs().keySet()) {
-            System.out.println(key);
-            System.out.println(Utils.toHexString(Utils.toByteArray(key)));
-            System.out.println(Utils.toHexString(node2.getDht().getValueByKey(Utils.toByteArray(key))));
-        }
-        /*
-        for(String key : node2.getDht().getStoredPairs().keySet()) {
-            System.out.println(Utils.toHexString(node2.getDht().getValueByKey(Utils.toByteArray(key))));
+        for(byte[] key : node1.getDht().getStoredPairs().keySet()) {
+            System.out.println(Utils.toHexString(key));
+            System.out.println(Utils.toHexString(node1.getDht().getValueByKey(key)));
         }
 
-         */
+        for(byte[] key : node2.getDht().getStoredPairs().keySet()) {
+            System.out.println(Utils.toHexString(key));
+            System.out.println(Utils.toHexString(node2.getDht().getValueByKey(key)));
+        }
+
     }
 }

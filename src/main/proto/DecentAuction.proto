@@ -12,7 +12,7 @@ service NetworkServer {
 
   rpc store(ProtoContent) returns (ProtoContent){} // instructs a node to store a key-value pair
 
-  rpc findNode(ProtoTarget) returns (stream FoundNode){} // returns information about the k nodes closest to the target id
+  rpc findNode(ProtoTarget) returns (FindNodeResponse){} // returns information about the k nodes closest to the target id
 
   rpc findValue(ProtoTarget) returns (stream FoundValue){} // similar to the FIND_NODE RPC, but if the recipient has received a STORE for the given key, it just returns the stored value
 }
@@ -21,6 +21,10 @@ message ProtoNode {
   string nodeIpAddress = 1;
   int32 nodePort = 2;
   bytes nodeId = 3;
+}
+
+message ProtoNodeList {
+  repeated ProtoNode nodes = 1;
 }
 
 message ProtoContent {
@@ -35,9 +39,9 @@ message ProtoTarget {
   bytes target = 2;
 }
 
-message FoundNode {
+message FindNodeResponse {
   ProtoNode sendingNode = 1;
-  int64 lastSeen = 2;
+  ProtoNodeList foundNodes = 2;
 }
 
 enum DataType {

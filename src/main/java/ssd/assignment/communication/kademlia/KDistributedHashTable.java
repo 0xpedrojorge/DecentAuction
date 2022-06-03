@@ -13,9 +13,9 @@ public class KDistributedHashTable {
     private final NetworkNode self;
 
     @Getter
-    private final Map<String, StoredData> storedPairs;
+    private final Map<byte[], StoredData> storedPairs;
     @Getter
-    private final Map<String, StoredData> selfPublishedPairs;
+    private final Map<byte[], StoredData> selfPublishedPairs;
 
     public KDistributedHashTable(NetworkNode self) {
         this.self = self;
@@ -24,30 +24,24 @@ public class KDistributedHashTable {
     }
 
     public void storePair(byte[] key, byte[] value, byte[] originalPublisherId) {
-        String keyAsString = Utils.toHexString(key);
         if (Arrays.equals(self.getNodeId(), originalPublisherId)) {
-            this.selfPublishedPairs.put(keyAsString, new StoredData(key, value, self.getNodeId()));
+            this.selfPublishedPairs.put(key, new StoredData(key, value, self.getNodeId()));
         }
 
-        if (this.storedPairs.containsKey(keyAsString)) {
-            storedPairs.get(keyAsString).updateValue(value);
+        if (this.storedPairs.containsKey(key)) {
+            storedPairs.get(key).updateValue(value);
         } else {
-            storedPairs.put(keyAsString, new StoredData(key, value, originalPublisherId));
+            storedPairs.put(key, new StoredData(key, value, originalPublisherId));
         }
     }
 
     public byte[] getValueByKey(byte[] key) {
-        String keyAsString = Utils.toHexString(key);
-        System.out.println(keyAsString);
-        for(String k : storedPairs.keySet()) {
-            System.out.println("------- " + k);
-        }
-        return storedPairs.get(keyAsString).getValue();
+        return storedPairs.get(key).getValue();
     }
 
     public void removeValueByKey(byte[] key) {
         String keyAsString = Utils.toHexString(key);
-        storedPairs.remove(keyAsString);
-        selfPublishedPairs.remove(keyAsString);
+        storedPairs.remove(key);
+        selfPublishedPairs.remove(key);
     }
 }

@@ -11,6 +11,7 @@ import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -87,16 +88,19 @@ public class DecentAuctionServer {
         }
 
         @Override
-        public void findNode(ProtoTarget req, StreamObserver<FoundNode> responseObserver) {
+        //public void findNode(ProtoTarget req, StreamObserver<FoundNode> responseObserver) {
+        public void findNode(ProtoTarget req, StreamObserver<FindNodeResponse> responseObserver) {
             handleIncomingContact(req.getSendingNode());
 
             /*
             Get the k closest contacts to the target that I have stored
              */
+            /*
             for (KContact c : localNode.getRoutingTable()
                     .getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K)) {
 
                 ProtoNode protoNode = buildOffKContact(c);
+
                 FoundNode protoFoundNode = FoundNode.newBuilder()
                         .setSendingNode(protoNode)
                         .setLastSeen(c.getLastSeen())
@@ -104,9 +108,20 @@ public class DecentAuctionServer {
 
                 responseObserver.onNext(protoFoundNode);
             }
-            responseObserver.onCompleted();
+             */
 
+            List<KContact> list = localNode.getRoutingTable()
+                    .getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K);
+
+            FindNodeResponse reply = FindNodeResponse.newBuilder()
+                    .setSendingNode(buildSelf())
+                    .setFoundNodes(buildOffKContactList(list))
+                    .build();
+
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
         }
+
 
         @Override
         public void findValue(ProtoTarget req, StreamObserver<FoundValue> responseObserver) {
@@ -166,6 +181,16 @@ public class DecentAuctionServer {
                     .build();
         }
 
+        private ProtoNodeList buildOffKContactList(List<KContact> contacts) {
+            ProtoNodeList.Builder protoListBuilder = ProtoNodeList.newBuilder();
+
+            for (KContact c : contacts) {
+                protoListBuilder.addNodes(buildOffKContact(c));
+            }
+
+            return protoListBuilder.build();
+        }
+
         private ProtoNode buildSelf() {
             return ProtoNode.newBuilder()
                     .setNodeIpAddress(Utils.getLocalAddressAsString())
@@ -174,5 +199,4 @@ public class DecentAuctionServer {
                     .build();
         }
     }
-
 }
