@@ -16,6 +16,7 @@ public class Wallet {
 
     public PrivateKey privateKey;
     public PublicKey publicKey;
+    public String walletOwner;
 
     public HashMap<String, TxOutput> UTXOs = new HashMap<>();
 
