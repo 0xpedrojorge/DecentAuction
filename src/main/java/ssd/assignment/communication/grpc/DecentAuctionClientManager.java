@@ -1,11 +1,27 @@
 package ssd.assignment.communication.grpc;
 
-import io.grpc.Channel;
+import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import ssd.assignment.communication.NetworkNode;
+import ssd.assignment.communication.kademlia.KContact;
+import ssd.assignment.communication.kademlia.StoredData;
+import ssd.assignment.communication.operations.ContentLookupOperation;
+import ssd.assignment.communication.operations.LookupOperation;
+import ssd.assignment.communication.operations.PingOperation;
+import ssd.assignment.communication.operations.StoreOperation;
+import ssd.assignment.util.Utils;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 
@@ -13,54 +29,220 @@ public class DecentAuctionClientManager {
 
     private static final Logger logger = Logger.getLogger(DecentAuctionClientManager.class.getName());
 
-    private final P2PServerGrpc.P2PServerBlockingStub blockingStub;
+    private final Map<byte[], ManagedChannel> channelsMap;
 
     public DecentAuctionClientManager() {
+        this.channelsMap = new ConcurrentHashMap<>();
+    }
+
+    private ManagedChannel getChannel(KContact contact) {
+        ManagedChannel channelToReturn;
 
         /*
-        TODO remove this example where I send a ping to myself
+        We start checking if the channel already exists in the map
+        and check that is not terminated or shutdown
          */
-        ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:50051")
-                // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
-                // needing certificates.
-                .usePlaintext()
+        if (channelsMap.containsKey(contact.getId())) {
+            channelToReturn = channelsMap.get(contact.getId());
+            if (channelToReturn.isTerminated() || channelToReturn.isShutdown()) {
+                channelToReturn = null;
+            }
+        } else {
+            channelToReturn = null;
+        }
+
+        /*
+        If the channel is still null, we create a new channel and save
+        it in the map
+         */
+        if (channelToReturn == null) {
+            channelToReturn = ManagedChannelBuilder.forAddress(contact.getIp().getHostAddress(), contact.getPort())
+                    .usePlaintext()
+                    .build();
+
+            channelsMap.put(contact.getId(), channelToReturn);
+        }
+
+        return channelToReturn;
+    }
+
+    private void voidChannel(KContact contact) {
+        ManagedChannel channel = channelsMap.remove(contact.getId());
+
+        if (channel == null) return;
+
+        if (channel.isTerminated() || channel.isShutdown()) return;
+
+        try {
+            channel.shutdownNow().awaitTermination(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private NetworkServerGrpc.NetworkServerStub newStub(KContact contact) {
+        ManagedChannel channel = getChannel(contact);
+        return NetworkServerGrpc.newStub(channel);
+    }
+
+    private NetworkServerGrpc.NetworkServerBlockingStub newBlockingStub(KContact contact) {
+        ManagedChannel channel = getChannel(contact);
+        return NetworkServerGrpc.newBlockingStub(channel);
+    }
+
+    public void ping(NetworkNode localNode, KContact recipient, PingOperation operation) {
+        logger.info("Ping from " + Utils.toHexString(localNode.getNodeId()));
+        NetworkServerGrpc.NetworkServerBlockingStub stub = newBlockingStub(recipient);
+
+        ProtoNode req = buildSelf(localNode);
+
+        ProtoNode response;
+        try {
+            response = stub.ping(req);
+            logger.info("Pong from " + Utils.toHexString(response.getNodeId().toByteArray()));
+            operation.handleSuccessfulRequest(recipient);
+        } catch (StatusRuntimeException e) {
+            e.printStackTrace();
+            voidChannel(recipient);
+            operation.handleFailedRequest(recipient);
+        }
+
+    }
+
+    public void store(NetworkNode localNode, KContact recipient, StoreOperation operation, StoredData data) {
+        logger.info("Starting store from " + Utils.toHexString(localNode.getNodeId()));
+        NetworkServerGrpc.NetworkServerStub stub = newStub(recipient);
+
+        ProtoNode self = buildSelf(localNode);
+        ProtoContent protoContent = ProtoContent.newBuilder()
+                .setSendingNode(self)
+                .setOriginalPublisherId(ByteString.copyFrom(data.getOriginalPublisherId()))
+                .setKey(ByteString.copyFrom(data.getKey()))
+                .setValue(ByteString.copyFrom(data.getValue()))
                 .build();
 
-        // Passing Channels to code makes code easier to test and makes it easier to reuse Channels.
-        blockingStub = P2PServerGrpc.newBlockingStub(channel);
-
-        try {
-            ping("Ping");
-        } finally {
-            // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
-            // resources the channel should be shut down when it will no longer be used. If it may be used
-            // again leave it running.
-            try {
-                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+        stub.store(protoContent, new StreamObserver<ProtoContent>() {
+            @Override
+            public void onNext(ProtoContent value) {
             }
-        }
+
+            @Override
+            public void onError(Throwable t) {
+                t.printStackTrace();
+                voidChannel(recipient);
+                operation.handleFailedRequest(recipient);
+            }
+
+            @Override
+            public void onCompleted() {
+                operation.handleSuccessfulRequest(recipient);
+            }
+        });
+
     }
 
-    public void ping(String name) {
-        logger.info("Ping");
-        Ping request = Ping.newBuilder().setName(name).build();
-        Pong response;
+    public void lookup(NetworkNode localNode, KContact recipient, LookupOperation operation, byte[] target) {
+        logger.info("Starting lookup from " + Utils.toHexString(localNode.getNodeId()));
+        NetworkServerGrpc.NetworkServerBlockingStub stub = newBlockingStub(recipient);
+
+        ProtoNode self = buildSelf(localNode);
+
+        ProtoTarget protoTarget = ProtoTarget.newBuilder()
+                .setSendingNode(self)
+                .setTarget(ByteString.copyFrom(target))
+                .build();
+
+        FindNodeResponse response;
         try {
-            response = blockingStub.ping(request);
+            response = stub.findNode(protoTarget);
+            List<KContact> returnedContacts = buildOffProtoNodeList(response.getFoundNodes());
+            operation.handleSuccessfulRequest(recipient, returnedContacts);
         } catch (StatusRuntimeException e) {
-            logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return;
+            e.printStackTrace();
+            voidChannel(recipient);
+            operation.handleFailedRequest(recipient);
         }
-        logger.info(response.getMessage());
     }
 
-    /*
-    TODO replace main with constructor
-     */
-    public static void main(String[] args) {
-        DecentAuctionClientManager client = new DecentAuctionClientManager();
+    public void findValue(NetworkNode localNode, KContact recipient, ContentLookupOperation operation, byte[] keyToLookup) {
+        logger.info("Starting findValue from " + Utils.toHexString(localNode.getNodeId()));
+        NetworkServerGrpc.NetworkServerStub stub = newStub(recipient);
+
+        ProtoNode self = buildSelf(localNode);
+
+        ProtoTarget protoTarget = ProtoTarget.newBuilder()
+                .setSendingNode(self)
+                .setTarget(ByteString.copyFrom(keyToLookup))
+                .build();
+
+        /*
+        Had to use write-only element because of an error,
+        still don't fully understand it
+         */
+        AtomicReference<byte[]> returnedValue = new AtomicReference<>(null);
+        List<KContact> returnedContacts = new ArrayList<>();
+
+        stub.findValue(protoTarget, new StreamObserver<FoundValue>() {
+            @Override
+            public void onNext(FoundValue value) {
+                if (value.getDataType() == DataType.FOUND_VALUE) {
+                    returnedValue.set(value.getValue().toByteArray());
+                } else {
+                    InetAddress foundAddress;
+                    try {
+                        foundAddress = InetAddress.getByName(value.getSendingNode().getNodeIpAddress());
+                    } catch (UnknownHostException e) {
+                        throw new RuntimeException(e);
+                    }
+                    int foundPort = value.getSendingNode().getNodePort();
+                    byte[] foundId = value.getSendingNode().getNodeId().toByteArray();
+                    returnedContacts.add(new KContact(foundAddress, foundPort, foundId, System.currentTimeMillis()));
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                t.printStackTrace();
+                voidChannel(recipient);
+                operation.handleFailedRequest(recipient);
+            }
+
+            @Override
+            public void onCompleted() {
+                if (returnedValue.get() != null) {
+                    operation.handleFoundValue(recipient, returnedValue.get());
+                } else {
+                    operation.handleReturnedNodes(recipient, returnedContacts);
+                }
+            }
+        });
+    }
+
+    private ProtoNode buildSelf(NetworkNode self) {
+        return ProtoNode.newBuilder()
+                .setNodeIpAddress(Utils.getLocalAddressAsString())
+                .setNodePort(self.getPort())
+                .setNodeId(ByteString.copyFrom(self.getNodeId()))
+                .build();
+    }
+
+    private KContact buildOffProtoNode(ProtoNode proto) {
+        InetAddress address;
+        try {
+            address = InetAddress.getByName(proto.getNodeIpAddress());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+        return new KContact(address, proto.getNodePort(), proto.getNodeId().toByteArray(), System.currentTimeMillis());
+    }
+
+    private List<KContact> buildOffProtoNodeList(ProtoNodeList protoList) {
+        List<KContact> list = new ArrayList<>();
+
+        for(ProtoNode protoNode : protoList.getNodesList()) {
+            list.add(buildOffProtoNode(protoNode));
+        }
+        return list;
     }
 
 }

@@ -53,6 +53,4 @@ public abstract class Crypto {
         assert bytes != null;
         return Utils.toHexString(bytes);
     }
-
-
 }

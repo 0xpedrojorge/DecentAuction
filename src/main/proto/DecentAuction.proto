@@ -7,29 +7,51 @@ option objc_class_prefix = "DA";
 
 package decentauction;
 
-service P2PServer {
-  rpc ping(Ping) returns (Pong) {}
+service NetworkServer {
+  rpc ping(ProtoNode) returns (ProtoNode) {}
 
-  rpc store(exampleRequest) returns (exampleReply){} // instructs a node to store a key-value pair
+  rpc store(ProtoContent) returns (ProtoContent){} // instructs a node to store a key-value pair
 
-  rpc findNode(exampleRequest) returns (exampleReply){} // returns information about the k nodes closest to the target id
+  rpc findNode(ProtoTarget) returns (FindNodeResponse){} // returns information about the k nodes closest to the target id
 
-  rpc findValue(exampleRequest) returns (exampleReply){} // similar to the FIND_NODE RPC, but if the recipient has received a STORE for the given key, it just returns the stored value
+  rpc findValue(ProtoTarget) returns (stream FoundValue){} // similar to the FIND_NODE RPC, but if the recipient has received a STORE for the given key, it just returns the stored value
 }
 
-message Ping {
-  string name = 1;
+message ProtoNode {
+  string nodeIpAddress = 1;
+  int32 nodePort = 2;
+  bytes nodeId = 3;
 }
 
-message Pong {
-  string message = 1;
+message ProtoNodeList {
+  repeated ProtoNode nodes = 1;
 }
 
-// Type of messages used in Kademlia protocol
-message exampleRequest{
-  string exampleString = 1;
+message ProtoContent {
+  ProtoNode sendingNode = 1;
+  bytes originalPublisherId = 2;
+  bytes key = 3;
+  bytes value = 4;
 }
 
-message exampleReply{
-  string exampleString = 1;
+message ProtoTarget {
+  ProtoNode sendingNode = 1;
+  bytes target = 2;
+}
+
+message FindNodeResponse {
+  ProtoNode sendingNode = 1;
+  ProtoNodeList foundNodes = 2;
+}
+
+enum DataType {
+  FOUND_VALUE = 0;
+  FOUND_NODES = 1;
+}
+
+message FoundValue {
+  ProtoNode sendingNode = 1;
+  DataType dataType = 2;
+  bytes key = 3;
+  bytes value = 4;
 }
