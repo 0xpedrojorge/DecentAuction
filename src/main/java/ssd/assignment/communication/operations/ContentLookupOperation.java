@@ -5,6 +5,7 @@ import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.kademlia.StoredData;
 import ssd.assignment.communication.kademlia.util.KContactDistanceComparator;
 import ssd.assignment.util.Standards;
+import ssd.assignment.util.Utils;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -41,24 +42,21 @@ public class ContentLookupOperation implements Operation {
 
     @Override
     public void execute() {
-        Thread t = new Thread(() -> {
-            int totalTimeWaited = 0;
-            int timeInterval = 20;
+        int totalTimeWaited = 0;
+        int timeInterval = 20;
 
-            while (true) {
-                if (!checkContacts()) {
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(totalTimeWaited);
-                        totalTimeWaited += timeInterval;
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    break;
+        while (true) {
+            if (!checkContacts()) {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(totalTimeWaited);
+                    totalTimeWaited += timeInterval;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
+            } else {
+                break;
             }
-        });
-        t.start();
+        }
     }
 
     public void handleFailedRequest(KContact contact) {
@@ -68,12 +66,13 @@ public class ContentLookupOperation implements Operation {
         checkContacts();
     }
 
-    public void handleFoundValue(KContact contact, byte[] value) {
-        foundContent = value;
+    public void handleFoundValue(KContact contact, StoredData data) {
+        foundContent = data.getValue();
         awatingResponse.remove(contact);
         operations.put(contact, Status.ASKED_AND_RESPONDED);
         //TODO take care of consumers waiting for the value
         localNode.getRoutingTable().insert(contact);
+        localNode.getDht().storePair(data.getKey(), data.getValue(), data.getOriginalPublisherId());
     }
 
     public void handleReturnedNodes(KContact contact, List<KContact> newContacts) {

@@ -14,7 +14,7 @@ service NetworkServer {
 
   rpc findNode(ProtoTarget) returns (FindNodeResponse){} // returns information about the k nodes closest to the target id
 
-  rpc findValue(ProtoTarget) returns (stream FoundValue){} // similar to the FIND_NODE RPC, but if the recipient has received a STORE for the given key, it just returns the stored value
+  rpc findValue(ProtoTarget) returns (FoundValue){} // similar to the FIND_NODE RPC, but if the recipient has received a STORE for the given key, it just returns the stored value
 }
 
 message ProtoNode {
@@ -52,6 +52,6 @@ enum DataType {
 message FoundValue {
   ProtoNode sendingNode = 1;
   DataType dataType = 2;
-  bytes key = 3;
-  bytes value = 4;
+  ProtoContent foundValue = 3;
+  ProtoNodeList foundNodes = 4;
 }

@@ -1,5 +1,6 @@
 package ssd.assignment.communication.kademlia;
 
+import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.util.Utils;
@@ -10,38 +11,48 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class KDistributedHashTable {
 
-    private final NetworkNode self;
-
     @Getter
     private final Map<byte[], StoredData> storedPairs;
-    @Getter
-    private final Map<byte[], StoredData> selfPublishedPairs;
 
-    public KDistributedHashTable(NetworkNode self) {
-        this.self = self;
+    public KDistributedHashTable() {
         this.storedPairs = new ConcurrentHashMap<>();
-        this.selfPublishedPairs = new ConcurrentHashMap<>();
     }
 
     public void storePair(byte[] key, byte[] value, byte[] originalPublisherId) {
-        if (Arrays.equals(self.getNodeId(), originalPublisherId)) {
-            this.selfPublishedPairs.put(key, new StoredData(key, value, self.getNodeId()));
+        boolean isAlreadyStored = false;
+        for(byte[] k : storedPairs.keySet()) {
+            if (Arrays.equals(k, key)) {
+                isAlreadyStored = true;
+                break;
+            }
         }
 
-        if (this.storedPairs.containsKey(key)) {
-            storedPairs.get(key).updateValue(value);
+        if (isAlreadyStored) {
+            for(byte[] k : storedPairs.keySet()) {
+                if (Arrays.equals(k, key)) {
+                    storedPairs.get(k).updateValue(value);
+                    break;
+                }
+            }
         } else {
             storedPairs.put(key, new StoredData(key, value, originalPublisherId));
         }
     }
 
-    public byte[] getValueByKey(byte[] key) {
-        return storedPairs.get(key).getValue();
+    public StoredData getValueByKey(byte[] key) {
+        for(byte[] k : storedPairs.keySet()) {
+            if (Arrays.equals(k, key)) {
+                return storedPairs.get(k);
+            }
+        }
+        return null;
     }
 
     public void removeValueByKey(byte[] key) {
-        String keyAsString = Utils.toHexString(key);
-        storedPairs.remove(key);
-        selfPublishedPairs.remove(key);
+        for(byte[] k : storedPairs.keySet()) {
+            if (Arrays.equals(k, key)) {
+                storedPairs.remove(k);
+            }
+        }
     }
 }

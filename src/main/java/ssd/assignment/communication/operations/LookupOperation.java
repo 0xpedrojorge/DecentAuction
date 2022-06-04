@@ -36,24 +36,21 @@ public class LookupOperation implements Operation {
 
     @Override
     public void execute() {
-        Thread t = new Thread(() -> {
-            int totalTimeWaited = 0;
-            int timeInterval = 20;
+        int totalTimeWaited = 0;
+        int timeInterval = 20;
 
-            while (true) {
-                if (!checkContacts()) {
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(totalTimeWaited);
-                        totalTimeWaited += timeInterval;
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    break;
+        while (true) {
+            if (!checkContacts()) {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(totalTimeWaited);
+                    totalTimeWaited += timeInterval;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
+            } else {
+                break;
             }
-        });
-        t.start();
+        }
     }
 
     public void handleFailedRequest(KContact contact) {
@@ -64,7 +61,6 @@ public class LookupOperation implements Operation {
     }
 
     public void handleSuccessfulRequest(KContact contact, List<KContact> newContacts) {
-        System.out.println("Got a successful response from node " + Utils.toHexString(contact.getId()));
         awatingResponse.remove(contact);
         operations.put(contact, Status.ASKED_AND_RESPONDED);
         /*
