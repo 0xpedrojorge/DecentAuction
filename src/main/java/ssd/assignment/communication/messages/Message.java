@@ -3,12 +3,12 @@ package ssd.assignment.communication.messages;
 import lombok.Getter;
 
 @Getter
-public abstract class Message {
+public final class Message {
 
-    private MessageType type;
+    private final MessageData data;
 
-    public Message(MessageType type) {
-        this.type = type;
+    public Message(MessageData data) {
+        this.data = data;
     }
 
 }

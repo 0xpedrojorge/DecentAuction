@@ -6,16 +6,18 @@ import ssd.assignment.util.Crypto;
 import ssd.assignment.util.CustomExclusionStrategy;
 import ssd.assignment.util.Utils;
 
+import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 
 @Getter
-public class Transaction {
+public class Transaction implements Serializable {
 
     public String id;
-    public PublicKey sender;
-    public PublicKey reciepient;
+    public transient PublicKey sender;
+    public transient PublicKey reciepient;
     public float amount;
     public byte[] signature;
 
@@ -68,6 +70,6 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return new GsonBuilder().create().toJson(this);
+        return new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).create().toJson(this);
     }
 }

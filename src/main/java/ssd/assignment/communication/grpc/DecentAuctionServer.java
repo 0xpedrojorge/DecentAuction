@@ -170,9 +170,6 @@ public class DecentAuctionServer {
                 }
             });
 
-            System.out.println("Message from " + Utils.toHexString(req.getSendingNode().getNodeId().toByteArray()) +" found at node "
-            + Utils.toHexString(localNode.getNodeId()) + ": " + new String(message));
-
             responseObserver.onCompleted();
         }
 
@@ -200,9 +197,6 @@ public class DecentAuctionServer {
                         messageConsumer.accept(sendingNode, message);
                     }
                 });
-
-                System.out.println("Message from " + Utils.toHexString(req.getSendingNode().getNodeId().toByteArray()) +" found at node "
-                        + Utils.toHexString(localNode.getNodeId()) + ": " + new String(message));
             }
         }
 

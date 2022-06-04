@@ -8,7 +8,7 @@ import java.security.PublicKey;
 public class TxOutput {
 
     public String id;
-    public PublicKey reciepient; //also known as the new owner of these coins.
+    public transient PublicKey reciepient; //also known as the new owner of these coins.
     public float amount; //the amount of coins they own
     public String parentTransactionId; //the id of the transaction this output was created in
 
