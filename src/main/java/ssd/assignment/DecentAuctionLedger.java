@@ -37,16 +37,7 @@ public class DecentAuctionLedger {
         startBlockchain();
         startMessageManager();
 
-        if (args[0].equals("1")) {
-            simulateFewTransactions();
-        } else if (args[0].equals("0")) {
-            try {
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            System.out.println(blockchain.toPrettyString());
-        }
+        testTransactionsAndBlockBroadcast(args[0]);
     }
 
     private void startNetwork(int portDelta) {
@@ -78,6 +69,20 @@ public class DecentAuctionLedger {
             messageManager.publishMessage(blockMessage);
         });
         System.out.println("Started message manager");
+    }
+
+    private void testTransactionsAndBlockBroadcast(String arg) {
+        if (arg.equals("1")) {
+            simulateFewTransactions();
+        } else if (arg.equals("0")) {
+            try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println(blockchain.toPrettyString());
+            System.out.print("Is blockchain valid? " + blockchain.isValid());
+        }
     }
 
     private void simulateFewTransactions() {
