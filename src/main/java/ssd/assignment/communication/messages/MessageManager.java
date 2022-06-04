@@ -2,10 +2,15 @@ package ssd.assignment.communication.messages;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ssd.assignment.blockchain.blocks.Block;
 import ssd.assignment.blockchain.blocks.BlockChain;
+import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.messages.adapters.MessageAdaptar;
+import ssd.assignment.communication.messages.types.BlockMessage;
+import ssd.assignment.communication.messages.types.TestMessage;
+import ssd.assignment.communication.messages.types.TransactionMessage;
 import ssd.assignment.communication.operations.BroadcastMessageOperation;
 import ssd.assignment.util.Crypto;
 import ssd.assignment.util.CustomExclusionStrategy;
@@ -45,22 +50,27 @@ public class MessageManager {
 
     public void receiveMessage(KContact sendingContact, byte[] message) {
         //TODO deal with incoming messages
-        String jsonMessage = new String(message);
-        System.out.println("Received " + jsonMessage);
+        //String jsonMessage = new String(message);
+        //System.out.println("Received " + jsonMessage);
 
-        Message parsedMessage = gson.fromJson(jsonMessage, Message.class);
+        Message parsedMessage = gson.fromJson(new String(message), Message.class);
 
         switch (parsedMessage.getData().getType()) {
             case BRADCAST_TEST_MESSAGE: {
-                System.out.println("Received a test message");
+                String stuff = ((TestMessage) parsedMessage.getData()).getStuff();
+                System.out.println("Received a test message: " + stuff);
                 break;
             }
             case BROADCAST_TRANSACTION: {
-                System.out.println("Received a transaction");
+                Transaction transaction = ((TransactionMessage) parsedMessage.getData()).getTransaction();
+                System.out.println("Received a transacion:" + transaction);
+                blockChain.getTransactionPool().addTransaction(transaction);
                 break;
             }
             case BROADCAST_BLOCK: {
-                System.out.println("Received a block");
+                Block block = ((BlockMessage) parsedMessage.getData()).getBlock();
+                System.out.println("Received a block : " + block);
+                blockChain.addBlock(block);
                 break;
             }
         }

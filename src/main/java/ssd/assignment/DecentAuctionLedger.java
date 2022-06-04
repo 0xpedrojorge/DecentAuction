@@ -39,6 +39,13 @@ public class DecentAuctionLedger {
 
         if (args[0].equals("1")) {
             simulateFewTransactions();
+        } else if (args[0].equals("0")) {
+            try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println(blockchain.toPrettyString());
         }
     }
 
