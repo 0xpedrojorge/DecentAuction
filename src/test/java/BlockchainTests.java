@@ -1,6 +1,25 @@
 import org.junit.Test;
+import ssd.assignment.blockchain.Wallet;
+import ssd.assignment.blockchain.transactions.Transaction;
+import ssd.assignment.blockchain.transactions.TxOutput;
+import ssd.assignment.communication.messages.TransactionMessage;
 
 public class BlockchainTests {
+
+    @Test
+    public void testTransactionCreation() {
+        Wallet coinbase = new Wallet();
+        Wallet walletA = new Wallet();
+
+        Transaction genesisTransaction = new Transaction(coinbase.publicKey, walletA.publicKey, 100f, null);
+        genesisTransaction.generateSignature(coinbase.privateKey);
+        genesisTransaction.id = "0";
+        genesisTransaction.getOutputs().add(new TxOutput(genesisTransaction.reciepient, genesisTransaction.amount, genesisTransaction.id));
+
+        TransactionMessage message = new TransactionMessage(genesisTransaction);
+
+        System.out.println(message.getTransaction());
+    }
 
     //startBlockchain();
 

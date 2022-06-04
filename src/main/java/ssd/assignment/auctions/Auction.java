@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class Auction {
 
     /**
-     * Entity to represent an Aucions
+     * Entity to represent an Aucion
      * */
 
     private static final Logger logger = Logger.getLogger(Auction.class.getName());

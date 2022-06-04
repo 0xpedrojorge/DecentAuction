@@ -200,7 +200,7 @@ public class DecentAuctionClientManager {
     }
 
     public void broadcastMessage(NetworkNode localNode, KContact recipient, BroadcastMessageOperation operation, int depth, byte[] messageId, byte[] message) {
-        //logger.info("Starting broadcastMessage from " + Utils.toHexString(localNode.getNodeId()));
+        logger.info("Starting broadcastMessage from " + Utils.toHexString(localNode.getNodeId()));
         NetworkServerGrpc.NetworkServerBlockingStub stub = newBlockingStub(recipient);
 
         ProtoBroadcastMessage broadcastMessage = ProtoBroadcastMessage.newBuilder()

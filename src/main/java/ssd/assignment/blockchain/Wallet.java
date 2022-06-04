@@ -4,7 +4,11 @@ import ssd.assignment.DecentAuctionLedger;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxInput;
 import ssd.assignment.blockchain.transactions.TxOutput;
+import ssd.assignment.communication.NetworkNode;
+import ssd.assignment.communication.messages.TransactionMessage;
+import ssd.assignment.communication.operations.BroadcastMessageOperation;
 import ssd.assignment.util.Crypto;
+import ssd.assignment.util.Utils;
 
 import java.security.*;
 import java.util.ArrayList;
@@ -94,6 +98,12 @@ public class Wallet {
         }
 
         //TODO broadcast transaction
+        TransactionMessage transactionMessage = new TransactionMessage(newTransaction);
+        NetworkNode localNode = DecentAuctionLedger.getNetworkNode();
+        byte[] messageId = Utils.toByteArray(Crypto.hash(transactionMessage.toString()));
+        byte[] message = Utils.toByteArray(transactionMessage.toString());
+
+        new BroadcastMessageOperation(localNode, 0, messageId, message);
 
         return newTransaction;
     }

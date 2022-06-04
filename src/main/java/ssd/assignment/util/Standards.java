@@ -78,4 +78,9 @@ public class Standards {
     */
     //public static final int BOOTSTAP_ATEMPTS = 5;
 
+    /*
+    Sets the default node id
+     */
+    public static final byte[] DEFAULT_NODE_ID = Utils.toByteArray("TheOGNode");
+
 }
