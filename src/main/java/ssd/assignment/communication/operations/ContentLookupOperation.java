@@ -67,6 +67,14 @@ public class ContentLookupOperation implements Operation {
     }
 
     public void handleFoundValue(KContact contact, StoredData data) {
+        /*
+        If already found just ignore response
+         */
+        if (foundContent != null) {
+            localNode.getRoutingTable().insert(contact);
+            return;
+        }
+
         foundContent = data.getValue();
         awatingResponse.remove(contact);
         operations.put(contact, Status.ASKED_AND_RESPONDED);
