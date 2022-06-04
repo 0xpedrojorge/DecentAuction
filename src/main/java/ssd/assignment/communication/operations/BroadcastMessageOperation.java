@@ -3,6 +3,7 @@ package ssd.assignment.communication.operations;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.util.Standards;
+import ssd.assignment.util.Utils;
 
 import java.util.*;
 
@@ -23,6 +24,9 @@ public class BroadcastMessageOperation implements Operation {
     @Override
     public void execute() {
         Random random = new Random();
+
+        localNode.addToSeenMessages(messageId);
+
         for (int i = depth; i < Standards.KADEMLIA_ID_BIT_SIZE; i++) {
 
             List<KContact> kBucket = localNode.getRoutingTable().getKBuckets()[i].getAllContacts();

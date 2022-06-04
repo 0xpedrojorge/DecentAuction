@@ -2,6 +2,7 @@ package ssd.assignment.communication.grpc;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.GeneratedMessageV3;
+import io.grpc.Context;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -13,19 +14,23 @@ import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.logging.Logger;
 
 public class DecentAuctionServer {
     private static final Logger logger = Logger.getLogger(DecentAuctionServer.class.getName());
 
     private Server server;
+    private NetworkServerImpl serverImpl;
 
     public void start(NetworkNode localNode, int port) throws IOException {
+        serverImpl = new NetworkServerImpl(localNode);
         server = ServerBuilder.forPort(port)
-                .addService(new NetworkServerImpl(localNode))
+                .addService(serverImpl)
                 .build()
                 .start();
         logger.info("Server started, listening on " + port);
@@ -54,11 +59,21 @@ public class DecentAuctionServer {
         }
     }
 
+    public void registerMessageConsumer(BiConsumer<KContact, byte[]> consumer) {
+        serverImpl.registerConsumer(consumer);
+    }
+
     static class NetworkServerImpl extends NetworkServerGrpc.NetworkServerImplBase {
-        NetworkNode localNode;
+        private final NetworkNode localNode;
+        private final List<BiConsumer<KContact, byte[]>> messageConsumers;
 
         public NetworkServerImpl(NetworkNode localNode) {
             this.localNode = localNode;
+            this.messageConsumers = new LinkedList<>();
+        }
+
+        public void registerConsumer(BiConsumer<KContact, byte[]> consumer) {
+            messageConsumers.add(consumer);
         }
 
         @Override
@@ -146,9 +161,14 @@ public class DecentAuctionServer {
         public void sendMessage(ProtoMessage req, StreamObserver<ProtoMessageResponse> responseObserver) {
             handleIncomingContact(req.getSendingNode());
 
+            KContact sendingNode = buildOffProtoNode(req.getSendingNode());
             byte[] message = req.getMessage().toByteArray();
 
-            //TODO handle received message
+            Context.current().fork().run(() -> {
+                for (BiConsumer<KContact, byte[]> messageConsumer : this.messageConsumers) {
+                    messageConsumer.accept(sendingNode, message);
+                }
+            });
 
             System.out.println("Message from " + Utils.toHexString(req.getSendingNode().getNodeId().toByteArray()) +" found at node "
             + Utils.toHexString(localNode.getNodeId()) + ": " + new String(message));
@@ -168,10 +188,19 @@ public class DecentAuctionServer {
             responseObserver.onCompleted();
 
             byte[] messageId = req.getMessageId().toByteArray();
+
             if (localNode.addToSeenMessages(messageId)) {
                 byte[] message = req.getMessage().toByteArray();
                 new BroadcastMessageOperation(localNode, req.getDepth(), messageId, message);
-                //TODO handle received message
+
+                KContact sendingNode = buildOffProtoNode(req.getSendingNode());
+
+                Context.current().fork().run(() -> {
+                    for (BiConsumer<KContact, byte[]> messageConsumer : this.messageConsumers) {
+                        messageConsumer.accept(sendingNode, message);
+                    }
+                });
+
                 System.out.println("Message from " + Utils.toHexString(req.getSendingNode().getNodeId().toByteArray()) +" found at node "
                         + Utils.toHexString(localNode.getNodeId()) + ": " + new String(message));
             }
@@ -205,6 +234,12 @@ public class DecentAuctionServer {
             }
 
             return protoListBuilder.build();
+        }
+
+        private KContact buildOffProtoNode(ProtoNode protoNode) {
+            return new KContact(Utils.getAddressFromString(protoNode.getNodeIpAddress()),
+                    protoNode.getNodePort(), protoNode.getNodeId().toByteArray(),
+                    System.currentTimeMillis());
         }
 
         private ProtoContent buildOffStoredData(StoredData data) {

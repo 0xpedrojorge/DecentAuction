@@ -7,6 +7,7 @@ import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.messages.MessageManager;
 import ssd.assignment.communication.messages.types.BlockMessage;
+import ssd.assignment.communication.operations.BroadcastMessageOperation;
 import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
@@ -31,6 +32,8 @@ public class DecentAuctionLedger {
         startNetwork(Integer.parseInt(args[0]));
         startBlockchain();
         startMessageManager();
+
+
     }
 
     private void startNetwork(int portDelta) {
@@ -42,6 +45,8 @@ public class DecentAuctionLedger {
                     new KContact(Utils.getLocalAddress(), Standards.DEFAULT_PORT, Standards.DEFAULT_NODE_ID, System.currentTimeMillis());
             Thread thread = new Thread(() -> networkNode.bootstrap(bootstrapNode));
             thread.start();
+
+            new BroadcastMessageOperation(networkNode, 0, Utils.toByteArray("1"), Utils.toByteArray("Content")).execute();
         }
         System.out.println("Started the network");
     }
@@ -54,6 +59,8 @@ public class DecentAuctionLedger {
 
     private void startMessageManager() {
         messageManager = new MessageManager(networkNode, blockchain);
+
+        networkNode.getServer().registerMessageConsumer(messageManager::receiveMessage);
 
         miningManager.registerBlockConsumer((block) -> {
             BlockMessage blockMessage = new BlockMessage(block);
