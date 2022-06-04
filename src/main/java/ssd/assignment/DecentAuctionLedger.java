@@ -1,6 +1,9 @@
 package ssd.assignment;
 
 import lombok.Getter;
+import ssd.assignment.auctions.Auction;
+import ssd.assignment.auctions.Client;
+import ssd.assignment.auctions.LiveAuctions;
 import ssd.assignment.blockchain.Wallet;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
@@ -25,6 +28,8 @@ public class DecentAuctionLedger {
     @Getter
     private static NetworkNode networkNode;
     @Getter
+    private static LiveAuctions liveAuctions;
+    @Getter
     private static MessageManager messageManager;
 
     public DecentAuctionLedger(String[] args) {
@@ -36,6 +41,8 @@ public class DecentAuctionLedger {
         startNetwork(Integer.parseInt(args[0]));
         startBlockchain();
         startMessageManager();
+
+        startLocalAuctions();
 
         testTransactionsAndBlockBroadcast(args[0]);
     }
@@ -124,6 +131,23 @@ public class DecentAuctionLedger {
         }
 
         System.out.print("Is blockchain valid? " + blockchain.isValid());
+    }
+
+    private void startLocalAuctions(){
+        liveAuctions=new LiveAuctions();
+
+        Wallet wallet =  new Wallet();
+
+        Auction auction = new Auction(wallet,"banana", "José", 1L, 0.5F, (long) 0.1, 1);
+        Auction auction2 = new Auction(wallet,"laranja", "Quim", 1L, 0.5F, (long) 0.1, 1);
+
+        liveAuctions.addAuction(auction);
+        liveAuctions.addAuction(auction2);
+
+        Runnable run = new Client();
+        run.run();
+
+
     }
 
     public static void main(String[] args) {
