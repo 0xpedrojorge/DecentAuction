@@ -1,10 +1,12 @@
 package ssd.assignment.auctions;
 
+import lombok.Getter;
 import ssd.assignment.blockchain.Wallet;
 
 import java.security.PublicKey;
 import java.util.logging.Logger;
 
+@Getter
 public class Bid {
 
     private static final Logger logger = Logger.getLogger(Bid.class.getName());
@@ -40,34 +42,6 @@ public class Bid {
         //Signature = signature;
 
     }
-
-    public String getItemId() {
-        return ItemId;
-    }
-
-    public String getSellerId() {
-        return SellerId;
-    }
-
-    public String getBuyerID() {
-        return BuyerID;
-    }
-
-    public long getAmount() {
-        return Amount;
-    }
-
-    //public long getFee() {return Fee;}
-
-    public PublicKey getBuyerPublicKey() {
-        return BuyerPublicKey;
-    }
-
-    public String getHash() {
-        return Hash;
-    }
-
-    //public byte[] getSignature() {return Signature;}
 
     @Override
     public String toString() {

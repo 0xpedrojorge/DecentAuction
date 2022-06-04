@@ -1,11 +1,13 @@
 package ssd.assignment.auctions;
 
+import lombok.Getter;
 import ssd.assignment.blockchain.Wallet;
 
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+@Getter
 public class Auction {
 
     /**
@@ -45,42 +47,6 @@ public class Auction {
         this.sellerPublicKey = wallet.publicKey;
         this.hash = wallet.getPublicKeyHash();
         this.signature = new byte[160]; //TODO hash signature! Not needed
-    }
-
-    public String getItemID() {
-        return itemID;
-    }
-
-    public String getSellerID() {
-        return sellerID;
-    }
-
-    public long getMinAmount() {
-        return minAmount;
-    }
-
-    public float getMinIncrement() {
-        return minIncrement;
-    }
-
-    public long getFee() {
-        return fee;
-    }
-
-    public long getTimeout() {
-        return timeout;
-    }
-
-    public PublicKey getSellerPublicKey() {
-        return sellerPublicKey;
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public byte[] getSignature() {
-        return signature;
     }
 
     @Override
