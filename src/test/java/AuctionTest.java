@@ -1,7 +1,7 @@
 import org.junit.Test;
 import ssd.assignment.auctions.Auction;
 import ssd.assignment.auctions.Client;
-import ssd.assignment.auctions.Manager;
+import ssd.assignment.auctions.AuctionManager;
 import ssd.assignment.blockchain.Wallet;
 
 public class AuctionTest {
@@ -13,7 +13,7 @@ public class AuctionTest {
 
         Auction auction = new Auction(wallet,"banana", "José", 1L, 0.5F, (long) 0.1, 1);
 
-        Manager manager = new Manager(auction);
+        AuctionManager auctionManager = new AuctionManager();
 
         Runnable run = new Client();
 

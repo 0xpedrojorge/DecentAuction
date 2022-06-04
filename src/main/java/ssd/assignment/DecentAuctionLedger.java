@@ -2,6 +2,7 @@ package ssd.assignment;
 
 import lombok.Getter;
 import ssd.assignment.auctions.Auction;
+import ssd.assignment.auctions.AuctionManager;
 import ssd.assignment.auctions.Client;
 import ssd.assignment.auctions.LiveAuctions;
 import ssd.assignment.blockchain.Wallet;
@@ -12,6 +13,7 @@ import ssd.assignment.blockchain.transactions.TxOutput;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.messages.MessageManager;
+import ssd.assignment.communication.messages.types.AuctionMessage;
 import ssd.assignment.communication.messages.types.BlockMessage;
 import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
@@ -28,7 +30,7 @@ public class DecentAuctionLedger {
     @Getter
     private static NetworkNode networkNode;
     @Getter
-    private static LiveAuctions liveAuctions;
+    private static AuctionManager auctionManager;
     @Getter
     private static MessageManager messageManager;
 
@@ -40,11 +42,11 @@ public class DecentAuctionLedger {
 
         startNetwork(Integer.parseInt(args[0]));
         startBlockchain();
+        startAuctionManager();
         startMessageManager();
 
-        startLocalAuctions();
-
-        testTransactionsAndBlockBroadcast(args[0]);
+        //startLocalAuctions();
+        //testTransactionsAndBlockBroadcast(args[0]);
     }
 
     private void startNetwork(int portDelta) {
@@ -67,7 +69,7 @@ public class DecentAuctionLedger {
     }
 
     private void startMessageManager() {
-        messageManager = new MessageManager(networkNode, blockchain);
+        messageManager = new MessageManager(networkNode, blockchain, auctionManager);
 
         networkNode.getServer().registerMessageConsumer(messageManager::receiveMessage);
 
@@ -90,6 +92,10 @@ public class DecentAuctionLedger {
             System.out.println(blockchain.toPrettyString());
             System.out.print("Is blockchain valid? " + blockchain.isValid());
         }
+    }
+
+    private void startAuctionManager() {
+        auctionManager = new AuctionManager();
     }
 
     private void simulateFewTransactions() {
@@ -134,7 +140,7 @@ public class DecentAuctionLedger {
     }
 
     private void startLocalAuctions(){
-        liveAuctions=new LiveAuctions();
+        LiveAuctions liveAuctions = new LiveAuctions();
 
         Wallet wallet =  new Wallet();
 

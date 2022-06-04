@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import static javax.management.Query.not;
 
-public class Client implements Runnable{
+public class Client implements Runnable {
 
     private static final Logger logger = Logger.getLogger(Client.class.getName());
 

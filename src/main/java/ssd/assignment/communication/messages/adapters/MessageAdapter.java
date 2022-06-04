@@ -1,13 +1,12 @@
 package ssd.assignment.communication.messages.adapters;
 
 import com.google.gson.*;
-import lombok.var;
 import ssd.assignment.communication.messages.Message;
 import ssd.assignment.communication.messages.MessageType;
 
 import java.lang.reflect.Type;
 
-public class MessageAdaptar implements JsonSerializer<Message>, JsonDeserializer<Message> {
+public class MessageAdapter implements JsonSerializer<Message>, JsonDeserializer<Message> {
 
 
     @Override
