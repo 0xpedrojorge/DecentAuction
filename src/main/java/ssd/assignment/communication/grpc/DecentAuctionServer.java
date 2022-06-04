@@ -7,10 +7,13 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
+import ssd.assignment.communication.kademlia.StoredData;
 import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -51,63 +54,100 @@ public class DecentAuctionServer {
     }
 
     static class NetworkServerImpl extends NetworkServerGrpc.NetworkServerImplBase {
-        NetworkNode node;
+        NetworkNode localNode;
 
-        public NetworkServerImpl(NetworkNode node) {
-            this.node = node;
+        public NetworkServerImpl(NetworkNode localNode) {
+            this.localNode = localNode;
         }
 
         @Override
         public void ping(ProtoNode req, StreamObserver<ProtoNode> responseObserver) {
             handleIncomingContact(req);
 
-            ProtoNode reply = ProtoNode.newBuilder()
-                    .setNodeIpAddress(Utils.getLocalAddressAsString())
-                    .setNodePort(node.getPort())
-                    .setNodeId(ByteString.copyFrom(node.getNodeId()))
-                    .build();
+            ProtoNode reply = buildSelf();
+
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
 
         @Override
-        public void store(exampleRequest req, StreamObserver<exampleReply> responseObserver) {
-            super.store(req, responseObserver);
-        }
-
-        @Override
-        public void findNode(ProtoTarget req, StreamObserver<FoundNode> responseObserver) {
+        public void store(ProtoContent req, StreamObserver<ProtoContent> responseObserver) {
             handleIncomingContact(req.getSendingNode());
 
-            /*
-            Get the k closest contacts to the target that I have stored
-             */
-            for (KContact c : node.getRoutingTable().getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K)) {
-                ProtoNode foundProtoNode = buildOffKContact(c);
-                FoundNode foundNode = FoundNode.newBuilder()
-                        .setFoundNode(foundProtoNode)
-                        .setLastSeen(c.getLastSeen())
-                        .build();
+            localNode.getDht().storePair(req.getKey().toByteArray(),
+                    req.getValue().toByteArray(), req.getOriginalPublisherId().toByteArray());
 
-                responseObserver.onNext(foundNode);
-            }
+            ProtoContent reply = ProtoContent.newBuilder()
+                    .setSendingNode(buildSelf())
+                    .setKey(req.getKey())
+                    .setValue(req.getValue())
+                    .build();
+
+            responseObserver.onNext(reply);
             responseObserver.onCompleted();
 
         }
 
         @Override
+        //public void findNode(ProtoTarget req, StreamObserver<FoundNode> responseObserver) {
+        public void findNode(ProtoTarget req, StreamObserver<FindNodeResponse> responseObserver) {
+            handleIncomingContact(req.getSendingNode());
+
+            List<KContact> list = localNode.getRoutingTable()
+                    .getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K);
+
+            FindNodeResponse reply = FindNodeResponse.newBuilder()
+                    .setSendingNode(buildSelf())
+                    .setFoundNodes(buildOffKContactList(list))
+                    .build();
+
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+        }
+
+
+        @Override
         public void findValue(ProtoTarget req, StreamObserver<FoundValue> responseObserver) {
-            super.findValue(req, responseObserver);
+            handleIncomingContact(req.getSendingNode());
+
+            byte[] target = req.getTarget().toByteArray();
+            StoredData toReturn = localNode.getDht().getValueByKey(target);
+
+            if (toReturn != null) {
+                /*
+                If the target key was found, return its value
+                 */
+                FoundValue protoFoundValue = FoundValue.newBuilder()
+                        .setSendingNode(buildSelf())
+                        .setDataType(DataType.FOUND_VALUE)
+                        .setFoundValue(buildOffStoredData(toReturn))
+                        .build();
+                responseObserver.onNext(protoFoundValue);
+            } else {
+                /*
+                Get the k closest contacts to the target that I have stored
+                */
+                List<KContact> list = localNode.getRoutingTable()
+                        .getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K);
+
+                FoundValue protoFoundValue = FoundValue.newBuilder()
+                        .setSendingNode(buildSelf())
+                        .setDataType(DataType.FOUND_NODES)
+                        .setFoundNodes(buildOffKContactList(list))
+                        .build();
+
+                responseObserver.onNext(protoFoundValue);
+            }
+            responseObserver.onCompleted();
         }
 
         private void handleIncomingContact(GeneratedMessageV3 req) {
             Thread t = new Thread(() -> {
                 if (req instanceof ProtoNode) {
-                    System.out.println("Received message from " + Utils.toHexString(((ProtoNode) req).getNodeId().toByteArray()) + ", adding to kBucket");
                     KContact incomingContact = new KContact(Utils.getAddressFromString(((ProtoNode) req).getNodeIpAddress()),
                             ((ProtoNode) req).getNodePort(), ((ProtoNode) req).getNodeId().toByteArray(), System.currentTimeMillis());
 
-                    node.getRoutingTable().insert(incomingContact);
+                    localNode.getRoutingTable().insert(incomingContact);
                 }
             });
             t.start();
@@ -120,6 +160,32 @@ public class DecentAuctionServer {
                     .setNodeId(ByteString.copyFrom(contact.getId()))
                     .build();
         }
-    }
 
+        private ProtoNodeList buildOffKContactList(List<KContact> contacts) {
+            ProtoNodeList.Builder protoListBuilder = ProtoNodeList.newBuilder();
+
+            for (KContact c : contacts) {
+                protoListBuilder.addNodes(buildOffKContact(c));
+            }
+
+            return protoListBuilder.build();
+        }
+
+        private ProtoContent buildOffStoredData(StoredData data) {
+            return ProtoContent.newBuilder()
+                    .setSendingNode(buildSelf())
+                    .setKey(ByteString.copyFrom(data.getKey()))
+                    .setValue(ByteString.copyFrom(data.getValue()))
+                    .setOriginalPublisherId(ByteString.copyFrom(data.getOriginalPublisherId()))
+                    .build();
+        }
+
+        private ProtoNode buildSelf() {
+            return ProtoNode.newBuilder()
+                    .setNodeIpAddress(Utils.getLocalAddressAsString())
+                    .setNodePort(localNode.getPort())
+                    .setNodeId(ByteString.copyFrom(localNode.getNodeId()))
+                    .build();
+        }
+    }
 }

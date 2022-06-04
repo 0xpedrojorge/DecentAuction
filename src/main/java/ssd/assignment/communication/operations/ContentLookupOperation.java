@@ -2,6 +2,7 @@ package ssd.assignment.communication.operations;
 
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
+import ssd.assignment.communication.kademlia.StoredData;
 import ssd.assignment.communication.kademlia.util.KContactDistanceComparator;
 import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
@@ -9,22 +10,25 @@ import ssd.assignment.util.Utils;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class LookupOperation implements Operation {
+public class ContentLookupOperation implements Operation {
 
     private final NetworkNode localNode;
-    private final byte[] idToLookup;
+    private final byte[] keyToLookup;
 
     private final Map<KContact, Status> operations;
     private final Map<KContact, Long> awatingResponse;
 
-    public LookupOperation(NetworkNode localNode, byte[] idToLookup) {
-        this.localNode = localNode;
-        this.idToLookup = idToLookup;
+    private byte[] foundContent;
 
-        this.operations = new TreeMap<>(new KContactDistanceComparator(idToLookup));
+    public ContentLookupOperation(NetworkNode localNode, byte[] keyToLookup) {
+        this.localNode = localNode;
+        this.keyToLookup = keyToLookup;
+
+        this.operations = new TreeMap<>(new KContactDistanceComparator(keyToLookup));
         this.awatingResponse = new HashMap<>();
 
         operations.put(localNode.getSelf(), Status.ASKED_AND_RESPONDED);
+
         /*
         Adding all known contacts because the k closest may be offline
          */
@@ -32,6 +36,8 @@ public class LookupOperation implements Operation {
         for (KContact c : contacts) {
             addContactToOperations(c);
         }
+
+        this.foundContent = null;
     }
 
     @Override
@@ -60,7 +66,16 @@ public class LookupOperation implements Operation {
         checkContacts();
     }
 
-    public void handleSuccessfulRequest(KContact contact, List<KContact> newContacts) {
+    public void handleFoundValue(KContact contact, StoredData data) {
+        foundContent = data.getValue();
+        awatingResponse.remove(contact);
+        operations.put(contact, Status.ASKED_AND_RESPONDED);
+        //TODO take care of consumers waiting for the value
+        localNode.getRoutingTable().insert(contact);
+        localNode.getDht().storePair(data.getKey(), data.getValue(), data.getOriginalPublisherId());
+    }
+
+    public void handleReturnedNodes(KContact contact, List<KContact> newContacts) {
         awatingResponse.remove(contact);
         operations.put(contact, Status.ASKED_AND_RESPONDED);
         /*
@@ -82,24 +97,20 @@ public class LookupOperation implements Operation {
     }
 
     private boolean checkContacts() {
+        if (foundContent != null) return true;
+
         if (awatingResponse.size() >= Standards.KADEMLIA_ALPHA) return false;
 
         List<KContact> nextContactsToQuery = getKClosestContactsByStatus(Status.NOT_ASKED);
-
         if (!nextContactsToQuery.isEmpty() || !awatingResponse.isEmpty() ) {
             for (KContact contact : nextContactsToQuery) {
-
                 operations.put(contact, Status.AWAITING_RESPONSE);
                 awatingResponse.put(contact, System.currentTimeMillis());
-                localNode.getClientManager().lookup(localNode, contact, this, idToLookup);
-                if (awatingResponse.size() >= Standards.KADEMLIA_ALPHA)  {
-                    break;
-                }
-
+                localNode.getClientManager().findValue(localNode, contact, this, keyToLookup);
+                if (awatingResponse.size() >= Standards.KADEMLIA_ALPHA) break;
             }
             return false;
         }
-
         return true;
     }
 

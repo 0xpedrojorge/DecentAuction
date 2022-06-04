@@ -4,6 +4,7 @@ import lombok.Getter;
 import ssd.assignment.communication.grpc.DecentAuctionClientManager;
 import ssd.assignment.communication.grpc.DecentAuctionServer;
 import ssd.assignment.communication.kademlia.KContact;
+import ssd.assignment.communication.kademlia.KDistributedHashTable;
 import ssd.assignment.communication.kademlia.KRoutingTable;
 import ssd.assignment.communication.operations.LookupOperation;
 import ssd.assignment.util.Utils;
@@ -21,6 +22,7 @@ public class NetworkNode {
     private final DecentAuctionClientManager clientManager;
 
     private final KRoutingTable routingTable;
+    private final KDistributedHashTable dht;
 
     public NetworkNode(byte[] nodeId, int port) {
         this.self = new KContact(Utils.getLocalAddress(), port, nodeId, System.currentTimeMillis());
@@ -45,6 +47,8 @@ public class NetworkNode {
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
+
+        this.dht = new KDistributedHashTable();
     }
 
     public void bootstrap(KContact contact) {

@@ -29,13 +29,13 @@ public class KBucket {
      * @param newContact the contact to be inserted
      */
     public synchronized void insert(KContact newContact) {
-        System.out.println("Trying to insert " + Utils.toHexString(newContact.getId()) + " at depth " + depth);
+        //System.out.println("Trying to insert " + Utils.toHexString(newContact.getId()) + " at depth " + depth);
         /*
         If the sending node already exists in the recipient’s k-bucket,
         the recipient moves it to the tail of the list
          */
         if (contacts.contains(newContact)) {
-            System.out.println(Utils.toHexString(newContact.getId()) + "is already in bucket, moving to tail");
+            //System.out.println(Utils.toHexString(newContact.getId()) + "is already in bucket, moving to tail");
             contacts.remove(newContact);
             newContact.setLastSeen(System.currentTimeMillis());
             newContact.resetStaleCount();
