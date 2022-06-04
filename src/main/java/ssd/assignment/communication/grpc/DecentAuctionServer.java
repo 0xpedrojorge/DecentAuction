@@ -8,6 +8,7 @@ import io.grpc.stub.StreamObserver;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.kademlia.StoredData;
+import ssd.assignment.communication.operations.BroadcastMessageOperation;
 import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
@@ -90,13 +91,13 @@ public class DecentAuctionServer {
 
         @Override
         //public void findNode(ProtoTarget req, StreamObserver<FoundNode> responseObserver) {
-        public void findNode(ProtoTarget req, StreamObserver<FindNodeResponse> responseObserver) {
+        public void findNode(ProtoTarget req, StreamObserver<ProtoFindNodeResponse> responseObserver) {
             handleIncomingContact(req.getSendingNode());
 
             List<KContact> list = localNode.getRoutingTable()
                     .getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K);
 
-            FindNodeResponse reply = FindNodeResponse.newBuilder()
+            ProtoFindNodeResponse reply = ProtoFindNodeResponse.newBuilder()
                     .setSendingNode(buildSelf())
                     .setFoundNodes(buildOffKContactList(list))
                     .build();
@@ -107,7 +108,7 @@ public class DecentAuctionServer {
 
 
         @Override
-        public void findValue(ProtoTarget req, StreamObserver<FoundValue> responseObserver) {
+        public void findValue(ProtoTarget req, StreamObserver<ProtoFindValueResponse> responseObserver) {
             handleIncomingContact(req.getSendingNode());
 
             byte[] target = req.getTarget().toByteArray();
@@ -117,7 +118,7 @@ public class DecentAuctionServer {
                 /*
                 If the target key was found, return its value
                  */
-                FoundValue protoFoundValue = FoundValue.newBuilder()
+                ProtoFindValueResponse protoFoundValue = ProtoFindValueResponse.newBuilder()
                         .setSendingNode(buildSelf())
                         .setDataType(DataType.FOUND_VALUE)
                         .setFoundValue(buildOffStoredData(toReturn))
@@ -130,7 +131,7 @@ public class DecentAuctionServer {
                 List<KContact> list = localNode.getRoutingTable()
                         .getNClosestContacts(req.getTarget().toByteArray(), Standards.KADEMLIA_K);
 
-                FoundValue protoFoundValue = FoundValue.newBuilder()
+                ProtoFindValueResponse protoFoundValue = ProtoFindValueResponse.newBuilder()
                         .setSendingNode(buildSelf())
                         .setDataType(DataType.FOUND_NODES)
                         .setFoundNodes(buildOffKContactList(list))
@@ -139,6 +140,41 @@ public class DecentAuctionServer {
                 responseObserver.onNext(protoFoundValue);
             }
             responseObserver.onCompleted();
+        }
+
+        @Override
+        public void sendMessage(ProtoMessage req, StreamObserver<ProtoMessageResponse> responseObserver) {
+            handleIncomingContact(req.getSendingNode());
+
+            byte[] message = req.getMessage().toByteArray();
+
+            //TODO handle received message
+
+            System.out.println("Message from " + Utils.toHexString(req.getSendingNode().getNodeId().toByteArray()) +" found at node "
+            + Utils.toHexString(localNode.getNodeId()) + ": " + new String(message));
+
+            responseObserver.onCompleted();
+        }
+
+        @Override
+        public void broadcastMessage(ProtoBroadcastMessage req, StreamObserver<ProtoNode> responseObserver) {
+            handleIncomingContact(req.getSendingNode());
+
+            /*
+            Warn about reception before dealing with message
+             */
+            ProtoNode reply = buildSelf();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+
+            byte[] messageId = req.getMessageId().toByteArray();
+            if (localNode.addToSeenMessages(messageId)) {
+                byte[] message = req.getMessage().toByteArray();
+                new BroadcastMessageOperation(localNode, req.getDepth(), messageId, message);
+                //TODO handle received message
+                System.out.println("Message from " + Utils.toHexString(req.getSendingNode().getNodeId().toByteArray()) +" found at node "
+                        + Utils.toHexString(localNode.getNodeId()) + ": " + new String(message));
+            }
         }
 
         private void handleIncomingContact(GeneratedMessageV3 req) {

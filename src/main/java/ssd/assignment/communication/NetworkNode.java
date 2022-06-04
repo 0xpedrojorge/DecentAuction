@@ -12,6 +12,9 @@ import ssd.assignment.util.Utils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Getter
 public class NetworkNode {
@@ -23,6 +26,7 @@ public class NetworkNode {
 
     private final KRoutingTable routingTable;
     private final KDistributedHashTable dht;
+    private final List<byte[]> seenMessages;
 
     public NetworkNode(byte[] nodeId, int port) {
         this.self = new KContact(Utils.getLocalAddress(), port, nodeId, System.currentTimeMillis());
@@ -49,6 +53,7 @@ public class NetworkNode {
         }
 
         this.dht = new KDistributedHashTable();
+        this.seenMessages = new ArrayList<>();
     }
 
     public void bootstrap(KContact contact) {
@@ -66,5 +71,15 @@ public class NetworkNode {
 
     public int getPort() {
         return self.getPort();
+    }
+
+    public boolean addToSeenMessages(byte[] messageId) {
+        for (byte[] m : seenMessages) {
+            if (Arrays.equals(m, messageId)) {
+                return false;
+            }
+        }
+        seenMessages.add(messageId);
+        return true;
     }
 }

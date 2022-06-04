@@ -49,6 +49,11 @@ public class Standards {
     public static final int KADEMLIA_ALPHA = 3;
 
     /*
+    Sets the max amount of nodes to broadcast to for each depth
+     */
+    public static final int KADEMLIA_MAX_BROADCAST_PER_DEPTH = 3;
+
+    /*
     Sets the staleness limit for Kademlia
      */
     public static final int KADEMLIA_STALENESS_LIMIT = 5;
