@@ -66,6 +66,6 @@ public class Standards {
     /*
     Sets the maximun number os atempts to bootstrap a node
     */
-    public static final int BOOTSTAP_ATEMPTS = 5;
+    //public static final int BOOTSTAP_ATEMPTS = 5;
 
 }
