@@ -91,7 +91,7 @@ public class DecentAuctionClientManager {
     }
 
     public void ping(NetworkNode localNode, KContact recipient, PingOperation operation) {
-        logger.info("Ping from " + Utils.toHexString(localNode.getNodeId()));
+        //logger.info("Ping from " + Utils.toHexString(localNode.getNodeId()));
         NetworkServerGrpc.NetworkServerBlockingStub stub = newBlockingStub(recipient);
 
         ProtoNode req = buildSelf(localNode);
@@ -102,7 +102,7 @@ public class DecentAuctionClientManager {
             logger.info("Pong from " + Utils.toHexString(response.getNodeId().toByteArray()));
             operation.handleSuccessfulRequest(recipient);
         } catch (StatusRuntimeException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             voidChannel(recipient);
             operation.handleFailedRequest(recipient);
         }
@@ -110,8 +110,8 @@ public class DecentAuctionClientManager {
     }
 
     public void store(NetworkNode localNode, KContact recipient, StoreOperation operation, StoredData data) {
-        logger.info("Starting store from " + Utils.toHexString(localNode.getNodeId()));
-        NetworkServerGrpc.NetworkServerStub stub = newStub(recipient);
+        //logger.info("Starting store from " + Utils.toHexString(localNode.getNodeId()));
+        NetworkServerGrpc.NetworkServerBlockingStub stub = newBlockingStub(recipient);
 
         ProtoNode self = buildSelf(localNode);
         ProtoContent protoContent = ProtoContent.newBuilder()
@@ -121,28 +121,19 @@ public class DecentAuctionClientManager {
                 .setValue(ByteString.copyFrom(data.getValue()))
                 .build();
 
-        stub.store(protoContent, new StreamObserver<ProtoContent>() {
-            @Override
-            public void onNext(ProtoContent value) {
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                t.printStackTrace();
-                voidChannel(recipient);
-                operation.handleFailedRequest(recipient);
-            }
-
-            @Override
-            public void onCompleted() {
-                operation.handleSuccessfulRequest(recipient);
-            }
-        });
-
+        ProtoContent response;
+        try {
+            response = stub.store(protoContent);
+            operation.handleSuccessfulRequest(recipient);
+        } catch (StatusRuntimeException e) {
+            //e.printStackTrace();
+            voidChannel(recipient);
+            operation.handleFailedRequest(recipient);
+        }
     }
 
     public void lookup(NetworkNode localNode, KContact recipient, LookupOperation operation, byte[] target) {
-        logger.info("Starting lookup from " + Utils.toHexString(localNode.getNodeId()));
+        //logger.info("Starting lookup from " + Utils.toHexString(localNode.getNodeId()));
         NetworkServerGrpc.NetworkServerBlockingStub stub = newBlockingStub(recipient);
 
         ProtoNode self = buildSelf(localNode);
@@ -158,20 +149,18 @@ public class DecentAuctionClientManager {
             List<KContact> returnedContacts = buildOffProtoNodeList(response.getFoundNodes());
             operation.handleSuccessfulRequest(recipient, returnedContacts);
         } catch (StatusRuntimeException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             voidChannel(recipient);
             operation.handleFailedRequest(recipient);
         }
     }
 
     public void findValue(NetworkNode localNode, KContact recipient, ContentLookupOperation operation, byte[] keyToLookup) {
-        logger.info("Starting findValue from " + Utils.toHexString(localNode.getNodeId()));
-        NetworkServerGrpc.NetworkServerStub stub = newStub(recipient);
-
-        ProtoNode self = buildSelf(localNode);
+        //logger.info("Starting findValue from " + Utils.toHexString(localNode.getNodeId()));
+        NetworkServerGrpc.NetworkServerBlockingStub stub = newBlockingStub(recipient);
 
         ProtoTarget protoTarget = ProtoTarget.newBuilder()
-                .setSendingNode(self)
+                .setSendingNode(buildSelf(localNode))
                 .setTarget(ByteString.copyFrom(keyToLookup))
                 .build();
 
@@ -179,43 +168,21 @@ public class DecentAuctionClientManager {
         Had to use write-only element because of an error,
         still don't fully understand it
          */
-        AtomicReference<byte[]> returnedValue = new AtomicReference<>(null);
-        List<KContact> returnedContacts = new ArrayList<>();
-
-        stub.findValue(protoTarget, new StreamObserver<FoundValue>() {
-            @Override
-            public void onNext(FoundValue value) {
-                if (value.getDataType() == DataType.FOUND_VALUE) {
-                    returnedValue.set(value.getValue().toByteArray());
-                } else {
-                    InetAddress foundAddress;
-                    try {
-                        foundAddress = InetAddress.getByName(value.getSendingNode().getNodeIpAddress());
-                    } catch (UnknownHostException e) {
-                        throw new RuntimeException(e);
-                    }
-                    int foundPort = value.getSendingNode().getNodePort();
-                    byte[] foundId = value.getSendingNode().getNodeId().toByteArray();
-                    returnedContacts.add(new KContact(foundAddress, foundPort, foundId, System.currentTimeMillis()));
-                }
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                t.printStackTrace();
-                voidChannel(recipient);
-                operation.handleFailedRequest(recipient);
-            }
-
-            @Override
-            public void onCompleted() {
-                if (returnedValue.get() != null) {
-                    operation.handleFoundValue(recipient, returnedValue.get());
-                } else {
-                    operation.handleReturnedNodes(recipient, returnedContacts);
-                }
-            }
-        });
+        FoundValue response;
+        try {
+               response = stub.findValue(protoTarget);
+               if (response.getDataType() == DataType.FOUND_VALUE) {
+                   StoredData returnedData = buildOffProtoContent(response.getFoundValue());
+                   operation.handleFoundValue(recipient, returnedData);
+               } else {
+                   List<KContact> list = buildOffProtoNodeList(response.getFoundNodes());
+                   operation.handleReturnedNodes(recipient, list);
+               }
+        } catch (StatusRuntimeException e) {
+            //e.printStackTrace();
+            voidChannel(recipient);
+            operation.handleFailedRequest(recipient);
+        }
     }
 
     private ProtoNode buildSelf(NetworkNode self) {
@@ -243,6 +210,12 @@ public class DecentAuctionClientManager {
             list.add(buildOffProtoNode(protoNode));
         }
         return list;
+    }
+
+    private StoredData buildOffProtoContent(ProtoContent protoContent) {
+        return new StoredData(protoContent.getKey().toByteArray(),
+                protoContent.getValue().toByteArray(),
+                protoContent.getOriginalPublisherId().toByteArray());
     }
 
 }

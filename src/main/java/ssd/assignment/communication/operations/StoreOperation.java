@@ -16,26 +16,19 @@ public class StoreOperation implements Operation {
 
 
     public StoreOperation(NetworkNode localNode, StoredData data) {
+        System.out.println("Here I started the store operation");
         this.localNode = localNode;
         this.data = data;
     }
 
     @Override
     public void execute() {
-        System.out.println("Here I started the store operation");
         localNode.getDht().storePair(data.getKey(), data.getValue(), data.getOriginalPublisherId());
 
         LookupOperation lookupOperation = new LookupOperation(localNode, data.getKey());
         lookupOperation.execute();
 
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
         List<KContact> closestContactsToKey = lookupOperation.getKClosestContactsByStatus(Status.ASKED_AND_RESPONDED);
-        System.out.println("Finished the lookup with " + closestContactsToKey.size() + " contacts found");
 
         for (KContact contact : closestContactsToKey) {
             if (!Arrays.equals(contact.getId(), localNode.getNodeId())) {

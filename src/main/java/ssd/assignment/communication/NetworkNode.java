@@ -48,7 +48,7 @@ public class NetworkNode {
             throw new RuntimeException(e);
         }
 
-        this.dht = new KDistributedHashTable(this);
+        this.dht = new KDistributedHashTable();
     }
 
     public void bootstrap(KContact contact) {
