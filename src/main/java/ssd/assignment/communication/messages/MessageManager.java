@@ -24,9 +24,8 @@ public class MessageManager {
         new BroadcastMessageOperation(localNode, 0, messageId, messageAsBytes).execute();
     }
 
-    public byte[] receiveMessage(KContact sendingContact, byte[] message) {
-        System.out.println("YO I RECEIVED A MESSAGE");
-        return null;
+    public void receiveMessage(KContact sendingContact, byte[] message) {
+        //TODO deal with incoming messages
     }
 
 }
