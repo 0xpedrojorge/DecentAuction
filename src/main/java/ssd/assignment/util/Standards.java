@@ -81,6 +81,6 @@ public class Standards {
     /*
     Sets the default node id
      */
-    public static final byte[] DEFAULT_NODE_ID = Utils.toByteArray("TheOGNode");
+    public static final byte[] DEFAULT_NODE_ID = Utils.toByteArray("ThemOGNodeAndFriends");
 
 }

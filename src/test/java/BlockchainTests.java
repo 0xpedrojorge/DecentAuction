@@ -1,13 +1,17 @@
 import org.junit.Test;
+import ssd.assignment.DecentAuctionLedger;
 import ssd.assignment.blockchain.Wallet;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxOutput;
-import ssd.assignment.communication.messages.TransactionMessage;
+import ssd.assignment.communication.messages.types.TransactionMessage;
 
 public class BlockchainTests {
 
     @Test
     public void testTransactionCreation() {
+        DecentAuctionLedger ledger1 = new DecentAuctionLedger(new String[]{"0"}),
+                ledger2 = new DecentAuctionLedger(new String[]{"1"});
+
         Wallet coinbase = new Wallet();
         Wallet walletA = new Wallet();
 

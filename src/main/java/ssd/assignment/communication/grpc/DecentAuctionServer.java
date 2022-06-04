@@ -90,8 +90,8 @@ public class DecentAuctionServer {
         }
 
         @Override
-        //public void findNode(ProtoTarget req, StreamObserver<FoundNode> responseObserver) {
         public void findNode(ProtoTarget req, StreamObserver<ProtoFindNodeResponse> responseObserver) {
+            logger.info("Incoming lookup request from " + Utils.toHexString(req.getSendingNode().getNodeId().toByteArray()));
             handleIncomingContact(req.getSendingNode());
 
             List<KContact> list = localNode.getRoutingTable()

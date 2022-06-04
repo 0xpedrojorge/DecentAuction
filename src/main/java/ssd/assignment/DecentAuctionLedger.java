@@ -1,22 +1,15 @@
 package ssd.assignment;
 
 import lombok.Getter;
-import ssd.assignment.blockchain.Wallet;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
-import ssd.assignment.blockchain.transactions.Transaction;
-import ssd.assignment.blockchain.transactions.TxOutput;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
-import ssd.assignment.communication.messages.TransactionMessage;
-import ssd.assignment.communication.operations.BroadcastMessageOperation;
-import ssd.assignment.util.Crypto;
+import ssd.assignment.communication.messages.MessageManager;
+import ssd.assignment.communication.messages.types.BlockMessage;
 import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Random;
 
 public class DecentAuctionLedger {
 
@@ -26,6 +19,8 @@ public class DecentAuctionLedger {
     private static MiningManager miningManager;
     @Getter
     private static NetworkNode networkNode;
+    @Getter
+    private static MessageManager messageManager;
 
     public DecentAuctionLedger(String[] args) {
         if (args.length == 0) {
@@ -35,15 +30,36 @@ public class DecentAuctionLedger {
 
         startNetwork(Integer.parseInt(args[0]));
         startBlockchain();
+        startMessageManager();
+    }
+
+    private void startNetwork(int portDelta) {
+        if (portDelta == 0 ) {
+            networkNode = new NetworkNode(Standards.DEFAULT_NODE_ID, Standards.DEFAULT_PORT + portDelta);
+        } else {
+            networkNode = new NetworkNode(null, Standards.DEFAULT_PORT + portDelta);
+            KContact bootstrapNode =
+                    new KContact(Utils.getLocalAddress(), Standards.DEFAULT_PORT, Standards.DEFAULT_NODE_ID, System.currentTimeMillis());
+            Thread thread = new Thread(() -> networkNode.bootstrap(bootstrapNode));
+            thread.start();
+        }
+        System.out.println("Started the network");
     }
 
     private void startBlockchain() {
         blockchain = new BlockChain();
         miningManager = new MiningManager(blockchain);
+        System.out.println("Started the blockchain");
     }
 
-    private void startNetwork(int portDelta) {
-        System.out.println(portDelta);
+    private void startMessageManager() {
+        messageManager = new MessageManager(networkNode, blockchain);
+
+        miningManager.registerBlockConsumer((block) -> {
+            BlockMessage blockMessage = new BlockMessage(block);
+            messageManager.publishMessage(blockMessage);
+        });
+        System.out.println("Started message manager");
     }
 
     public static void main(String[] args) {

@@ -16,17 +16,8 @@ public class KademliaTests {
     @Test
     public void testBootstrap() {
 
-        Random random = new Random();
-        byte[] node1Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node1Id);
-        byte[] node2Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node2Id);
-
-        System.out.println(Utils.toHexString(node1Id));
-        System.out.println(Utils.toHexString(node2Id));
-
-        NetworkNode node1 = new NetworkNode(node1Id, 50050);
-        NetworkNode node2 = new NetworkNode(node2Id, 50051);
+        NetworkNode node1 = new NetworkNode(Standards.DEFAULT_NODE_ID, 50050);
+        NetworkNode node2 = new NetworkNode(null, 50051);
         KContact node2AsContact;
 
         try {
@@ -36,10 +27,10 @@ public class KademliaTests {
             throw new RuntimeException(e);
         }
 
-        PingOperation op1 = new PingOperation(node1, node2Id);
+        PingOperation op1 = new PingOperation(node1, node2.getNodeId());
         op1.execute();
 
-        PingOperation op2 = new PingOperation(node2, node1Id);
+        PingOperation op2 = new PingOperation(node2, node1.getNodeId());
         op2.execute();
 
         System.out.println("Node1: " + node1.getRoutingTable().getAllContacts());
@@ -49,17 +40,8 @@ public class KademliaTests {
     @Test
     public void testStore() {
 
-        Random random = new Random();
-        byte[] node1Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node1Id);
-        byte[] node2Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node2Id);
-
-        System.out.println(Utils.toHexString(node1Id));
-        System.out.println(Utils.toHexString(node2Id));
-
-        NetworkNode node1 = new NetworkNode(node1Id, 50050);
-        NetworkNode node2 = new NetworkNode(node2Id, 50051);
+        NetworkNode node1 = new NetworkNode(Standards.DEFAULT_NODE_ID, 50050);
+        NetworkNode node2 = new NetworkNode(null, 50051);
         KContact node2AsContact;
 
         try {
@@ -94,17 +76,8 @@ public class KademliaTests {
     @Test
     public void testContentLookup() {
 
-        Random random = new Random();
-        byte[] node1Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node1Id);
-        byte[] node2Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node2Id);
-
-        System.out.println(Utils.toHexString(node1Id));
-        System.out.println(Utils.toHexString(node2Id));
-
-        NetworkNode node1 = new NetworkNode(node1Id, 50050);
-        NetworkNode node2 = new NetworkNode(node2Id, 50051);
+        NetworkNode node1 = new NetworkNode(Standards.DEFAULT_NODE_ID, 50050);
+        NetworkNode node2 = new NetworkNode(null, 50051);
         KContact node2AsContact;
 
         try {
@@ -140,17 +113,8 @@ public class KademliaTests {
     @Test
     public void testSendMessage() {
 
-        Random random = new Random();
-        byte[] node1Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node1Id);
-        byte[] node2Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node2Id);
-
-        System.out.println(Utils.toHexString(node1Id));
-        System.out.println(Utils.toHexString(node2Id));
-
-        NetworkNode node1 = new NetworkNode(node1Id, 50050);
-        NetworkNode node2 = new NetworkNode(node2Id, 50051);
+        NetworkNode node1 = new NetworkNode(Standards.DEFAULT_NODE_ID, 50050);
+        NetworkNode node2 = new NetworkNode(null, 50051);
         KContact node2AsContact;
 
         try {
@@ -162,7 +126,7 @@ public class KademliaTests {
 
             String testMessage = "\nOi, fish face!\n*falls down stairs*\nLook what I got\n(Singing) I got a jar of sand";
 
-            SendMessageOperation op3 = new SendMessageOperation(node1, node2Id, Utils.toByteArray(testMessage));
+            SendMessageOperation op3 = new SendMessageOperation(node1, node2.getNodeId(), Utils.toByteArray(testMessage));
             op3.execute();
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
@@ -173,22 +137,9 @@ public class KademliaTests {
     @Test
     public void testBroadcastMessage() {
 
-        Random random = new Random();
-        byte[] node1Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node1Id);
-        byte[] node2Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node2Id);
-        byte[] node3Id = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
-        random.nextBytes(node3Id);
-
-
-        System.out.println(Utils.toHexString(node1Id));
-        System.out.println(Utils.toHexString(node2Id));
-        System.out.println(Utils.toHexString(node3Id));
-
-        NetworkNode node1 = new NetworkNode(node1Id, 50050);
-        NetworkNode node2 = new NetworkNode(node2Id, 50051);
-        NetworkNode node3 = new NetworkNode(node3Id, 50052);
+        NetworkNode node1 = new NetworkNode(Standards.DEFAULT_NODE_ID, 50050);
+        NetworkNode node2 = new NetworkNode(null, 50051);
+        NetworkNode node3 = new NetworkNode(null, 50052);
         KContact node2AsContact;
         KContact node3AsContact;
 
@@ -202,7 +153,7 @@ public class KademliaTests {
             System.out.println("Node2: " + node2.getRoutingTable().getAllContacts());
             System.out.println("Node3: " + node3.getRoutingTable().getAllContacts());
 
-            String testMessage = "\nOi, fish face!\n*falls down stairs*\nLook what I got\n(Singing) I got a jar of sand";
+            String testMessage = "\nOi, fish face!\n*falls down stairs*\nLook what I got\n(Singing) I got a jar of dirt!";
 
             BroadcastMessageOperation op3 =
                     new BroadcastMessageOperation(node1, 0, Utils.toByteArray(Crypto.hash(testMessage)),  Utils.toByteArray(testMessage));
