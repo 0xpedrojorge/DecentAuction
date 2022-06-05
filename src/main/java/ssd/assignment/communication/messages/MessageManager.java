@@ -45,14 +45,12 @@ public class MessageManager {
     public void publishMessage(MessageData messageData) {
 
         Message message = new Message(messageData);
-
         String jsonMessage = gson.toJson(message);
 
-        System.out.println("Broadcasting " + jsonMessage);
+        //System.out.println("Broadcasting " + jsonMessage);
 
-        byte[] messageId = Utils.toByteArray(Crypto.hash(jsonMessage));
 
-        new BroadcastMessageOperation(localNode, 0, messageId, jsonMessage.getBytes()).execute();
+        new BroadcastMessageOperation(localNode, 0, Utils.toByteArray(Crypto.hash(jsonMessage)), jsonMessage.getBytes()).execute();
     }
 
     public void sendMessage(MessageData messageData, KContact contact) {
@@ -61,7 +59,7 @@ public class MessageManager {
 
         String jsonMessage = gson.toJson(message);
 
-        System.out.println("Sending " + jsonMessage);
+        //System.out.println("Sending " + jsonMessage );
 
         new SendMessageOperation(localNode, contact.getId(), jsonMessage.getBytes()).execute();
     }
