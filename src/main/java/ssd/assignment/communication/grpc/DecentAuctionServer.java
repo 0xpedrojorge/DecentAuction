@@ -171,11 +171,9 @@ public class DecentAuctionServer {
             responseObserver.onNext(protoMessageResponse);
             responseObserver.onCompleted();
 
-            Context.current().fork().run(() -> {
-                for (BiConsumer<KContact, byte[]> messageConsumer : this.messageConsumers) {
-                    messageConsumer.accept(sendingNode, message);
-                }
-            });
+            for (BiConsumer<KContact, byte[]> messageConsumer : this.messageConsumers) {
+                messageConsumer.accept(sendingNode, message);
+            }
         }
 
         @Override
@@ -197,7 +195,8 @@ public class DecentAuctionServer {
 
                 KContact sendingNode = buildOffProtoNode(req.getSendingNode());
 
-                Context.current().fork().run(() -> {
+                Context context = Context.current().fork();
+                context.run(() -> {
                     for (BiConsumer<KContact, byte[]> messageConsumer : this.messageConsumers) {
                         messageConsumer.accept(sendingNode, message);
                     }
