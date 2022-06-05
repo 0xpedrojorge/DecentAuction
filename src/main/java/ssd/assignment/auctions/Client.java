@@ -88,7 +88,7 @@ public class Client implements Runnable {
         System.out.print(" \n Witch Auction do you whish to bet? \n -> ");
 
         String answer = stdin.nextLine();
-        String auctionID=answer;
+        String auctionID = answer;
 
         while(!auctionManager.hasAuctionItem(answer)) {
             System.out.print(" Invalid Option, try again: \n -> ");
