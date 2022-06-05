@@ -9,7 +9,7 @@ import java.util.*;
 public class LiveAuction implements Serializable {
 
     protected final Auction auction;
-    protected TreeSet<Bid> bids = new TreeSet<>(new BidComparator());
+    protected TreeSet<Bid> bids = new TreeSet<>();
 
     public LiveAuction(Auction auction) {
         this.auction = auction;

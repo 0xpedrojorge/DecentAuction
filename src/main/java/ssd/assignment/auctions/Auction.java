@@ -7,7 +7,6 @@ import ssd.assignment.blockchain.Wallet;
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.security.PublicKey;
-import java.util.logging.Logger;
 
 @Getter
 public class Auction implements Serializable {

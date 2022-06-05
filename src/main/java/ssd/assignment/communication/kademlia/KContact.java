@@ -1,6 +1,5 @@
 package ssd.assignment.communication.kademlia;
 
-import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import ssd.assignment.util.Utils;

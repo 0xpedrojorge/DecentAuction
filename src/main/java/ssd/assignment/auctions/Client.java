@@ -58,7 +58,7 @@ public class Client implements Runnable {
 
         System.out.print(" Successfully Bided! ");
 
-        System.out.println(" Your Bid: "+currentBid.toString());
+        System.out.println(" Your Bid: "+currentBid);
         System.out.print(" Press Double enter to return to the menu. ");
         stdin.nextLine();
     }
@@ -101,7 +101,7 @@ public class Client implements Runnable {
         //TODO Rectify origin LiveAuction
         auctionManager.pritnLiveAuctions();
 
-        System.out.print(" \n Witch Auction do you whish to bet? \n -> ");
+        System.out.print(" \n Which Auction do you whish to bet? \n -> ");
 
         String answer = stdin.nextLine();
         String auctionID = answer;

@@ -7,10 +7,9 @@ import ssd.assignment.blockchain.Wallet;
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.security.PublicKey;
-import java.util.logging.Logger;
 
 @Getter
-public class Bid implements Serializable {
+public class Bid implements Serializable, Comparable {
 
     private final String itemId;
     //private final String sellerId;
@@ -50,4 +49,8 @@ public class Bid implements Serializable {
                 '}';
     }
 
+    @Override
+    public int compareTo(Object o) {
+        return Float.compare(this.getAmount(), ((Bid) o).getAmount());
+    }
 }
