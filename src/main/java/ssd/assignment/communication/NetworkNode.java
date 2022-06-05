@@ -1,7 +1,7 @@
 package ssd.assignment.communication;
 
 import lombok.Getter;
-import ssd.assignment.communication.grpc.DecentAuctionClientManager;
+import ssd.assignment.communication.grpc.DecentAuctionClient;
 import ssd.assignment.communication.grpc.DecentAuctionServer;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.kademlia.KDistributedHashTable;
@@ -14,11 +14,9 @@ import ssd.assignment.util.Utils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 @Getter
 public class NetworkNode {
@@ -26,7 +24,7 @@ public class NetworkNode {
     private final KContact self;
 
     private final DecentAuctionServer server;
-    private final DecentAuctionClientManager clientManager;
+    private final DecentAuctionClient clientManager;
 
     private final KRoutingTable routingTable;
     private final KDistributedHashTable dht;
@@ -53,7 +51,7 @@ public class NetworkNode {
             }
         });
         serverBlockedThread.start();
-        this.clientManager = new DecentAuctionClientManager();
+        this.clientManager = new DecentAuctionClient();
 
         try {
             this.routingTable = new KRoutingTable(

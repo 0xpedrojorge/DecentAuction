@@ -46,8 +46,8 @@ public class DecentAuctionLedger {
         startAuctionManager();
         startMessageManager();
 
-        //startLocalAuctionsDemo(Integer.parseInt(args[0]));
-        transactionsAndBlockBroadcastDemo(Integer.parseInt(args[0]));
+        startLocalAuctionsDemo(Integer.parseInt(args[0]));
+        //transactionsAndBlockBroadcastDemo(Integer.parseInt(args[0]));
     }
 
     private void startNetwork(int portDelta) {

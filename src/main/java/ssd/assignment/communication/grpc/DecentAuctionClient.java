@@ -4,7 +4,6 @@ import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.kademlia.StoredData;
@@ -18,17 +17,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 
-public class DecentAuctionClientManager {
+public class DecentAuctionClient {
 
-    private static final Logger logger = Logger.getLogger(DecentAuctionClientManager.class.getName());
+    private static final Logger logger = Logger.getLogger(DecentAuctionClient.class.getName());
 
     private final Map<byte[], ManagedChannel> channelsMap;
 
-    public DecentAuctionClientManager() {
+    public DecentAuctionClient() {
         this.channelsMap = new ConcurrentHashMap<>();
     }
 
