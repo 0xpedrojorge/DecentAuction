@@ -96,7 +96,6 @@ public class DecentAuctionLedger {
                 throw new RuntimeException(e);
             }
             System.out.println(blockchain.toPrettyString());
-            System.out.print("Is blockchain valid? " + blockchain.isValid());
         }
     }
 
@@ -137,8 +136,6 @@ public class DecentAuctionLedger {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        System.out.print("Is blockchain valid? " + blockchain.isValid());
     }
 
     private void startLocalAuctionsDemo(int portDelta){

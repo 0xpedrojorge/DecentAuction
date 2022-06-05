@@ -45,8 +45,8 @@ public class Transaction implements Serializable {
     public float getInputsAmount() {
         float total = 0;
         for(TxInput i : inputs) {
-            if(i.UTXO == null) continue; //if Transaction can't be found skip it
-            total += i.UTXO.amount;
+            if(i.unspentTransactionOutput == null) continue;
+            total += i.unspentTransactionOutput.amount;
         }
         return total;
     }

@@ -75,7 +75,7 @@ public class Wallet {
 
         //gather transaction inputs (Make sure they are unspent):
         for(TxInput i : inputs) {
-            i.UTXO = DecentAuctionLedger.getBlockchain().getUTXOs().get(i.transactionOutputId);
+            i.unspentTransactionOutput = DecentAuctionLedger.getBlockchain().getUTXOs().get(i.transactionOutputId);
         }
 
         //generate transaction outputs:
@@ -91,8 +91,8 @@ public class Wallet {
 
         //remove transaction inputs from UTXO lists as spent:
         for(TxInput i : inputs) {
-            if(i.UTXO == null) continue;
-            DecentAuctionLedger.getBlockchain().getUTXOs().remove(i.UTXO.id);
+            if(i.unspentTransactionOutput == null) continue;
+            DecentAuctionLedger.getBlockchain().getUTXOs().remove(i.unspentTransactionOutput.id);
         }
 
         DecentAuctionLedger.getBlockchain().getTransactionPool().addTransaction(newTransaction);
