@@ -24,12 +24,12 @@ public class Client implements Runnable {
             System.out.println(" The Current Amount is: yet to be started! ");
         }
         else{
-            System.out.println(" The Current Amount is: "+liveauction.getLastBid().getAmount());
+            System.out.println(" The Current Amount is: "+liveauction.getLastBid().getAmount()+"€ ");
         }
         System.out.println(" The Minimun increment Amount is: "+liveauction.auction.getMinIncrement());
         System.out.print(" Place your bid amount: ");
         String aux = stdin.nextLine();
-        Float newAmount = Float.parseFloat(aux);
+        float newAmount = Float.parseFloat(aux);
 
         if(liveauction.getLastBid()!=null){
             float currAmount=liveauction.getLastBid().getAmount();
@@ -74,13 +74,13 @@ public class Client implements Runnable {
         String ItemID=stdin.nextLine();
         System.out.print(" Minimun Amount: ");
         String aux = stdin.nextLine();
-        Long minAmount=Long.parseLong(aux);
+        long minAmount=Long.parseLong(aux);
         System.out.print(" Minimun Increment: ");
         aux = stdin.nextLine();
-        Float minIncrement=Float.parseFloat(aux);
+        float minIncrement=Float.parseFloat(aux);
         System.out.print(" Duration of the Auction (in min): ");
         aux = stdin.nextLine();
-        Long timeout=Long.parseLong(aux);
+        long timeout=Long.parseLong(aux);
 
         Auction auction=new Auction(ItemID,wallet.walletOwner, minAmount, minIncrement,timeout, wallet.publicKey, wallet.getPublicKeyHash());
 
@@ -88,7 +88,7 @@ public class Client implements Runnable {
 
         System.out.print(" Successfully Added a new Auction! ");
 
-        System.out.println(" Your Auction: "+auction.toString());
+        System.out.println(" Your Auction: "+auction);
 
         System.out.print(" Press Double enter to return to the menu. ");
         stdin.nextLine();
@@ -134,9 +134,12 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
+        System.out.println(" \n\n Welcome to DecentAuctions! ");
+        System.out.print(" What is your sellerID?\n -> ");
+        wallet.walletOwner=stdin.nextLine();
+
         while(true) {
-            System.out.println(" \n\n Welcome to DecentAuctions! ");
-            System.out.println(" Please choose one of the following option: ");
+            System.out.println(" \nPlease choose one of the following option: ");
 
             System.out.print(" 1) New Auctions\n 2) Participate in Auction\n 3) Print Publik Key\n 4) Exit!\n -> ");
             int answer = stdin.nextInt();
