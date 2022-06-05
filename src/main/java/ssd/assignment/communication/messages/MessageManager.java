@@ -2,6 +2,7 @@ package ssd.assignment.communication.messages;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ssd.assignment.DecentAuctionLedger;
 import ssd.assignment.auctions.Auction;
 import ssd.assignment.auctions.AuctionManager;
 import ssd.assignment.auctions.Bid;
@@ -102,6 +103,14 @@ public class MessageManager {
             case REQUEST_LIVE_AUCTIONS: {
                 System.out.println("Request for Auctions in the network");
                 auctionManager.sendAuctionsTo(sendingContact);
+                break;
+            }
+            case REQUEST_PAYMENT: {
+                System.out.println("A payment has been requested");
+                Bid bid = ((BidMessage) parsedMessage.getData()).getBid();
+                if (DecentAuctionLedger.getWallet().publicKey.equals(bid.getBuyerPublicKey())) {
+                    DecentAuctionLedger.getWallet().createTransaction(bid.getBuyerPublicKey(), bid.getAmount());
+                }
                 break;
             }
         }

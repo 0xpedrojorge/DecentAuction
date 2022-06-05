@@ -11,9 +11,9 @@ public class Client implements Runnable {
 
     private static final Logger logger = Logger.getLogger(Client.class.getName());
 
-    static Wallet wallet;
+    private static Wallet wallet;
 
-    private static final Scanner stdin=new Scanner(System.in);
+    private static final Scanner stdin = new Scanner(System.in);
 
     public static void newBid(LiveAuction liveauction){
 
@@ -82,9 +82,10 @@ public class Client implements Runnable {
         aux = stdin.nextLine();
         long timeout=Long.parseLong(aux);
 
-        Auction auction=new Auction(ItemID,wallet.walletOwner, minAmount, minIncrement,timeout, wallet.publicKey, wallet.getPublicKeyHash());
+        Auction auction = new Auction(ItemID, wallet.walletOwner, minAmount, minIncrement,timeout, wallet.publicKey, wallet.getPublicKeyHash());
 
         auctionManager.addLocalAuction(auction);
+
 
         System.out.print(" Successfully Added a new Auction! ");
 
@@ -98,7 +99,6 @@ public class Client implements Runnable {
     public void JoinAuctions(){
         System.out.println(" \n\n Join Auctions! \n");
 
-        //TODO Rectify origin LiveAuction
         auctionManager.pritnLiveAuctions();
 
         System.out.print(" \n Which Auction do you whish to bet? \n -> ");

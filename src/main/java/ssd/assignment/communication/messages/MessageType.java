@@ -12,7 +12,8 @@ public enum MessageType {
     BROADCAST_BLOCK(BlockMessage.class),
     BROADCAST_BID(BidMessage.class),
     BROADCAST_AUCTION(AuctionMessage.class),
-    REQUEST_LIVE_AUCTIONS(RequestLiveAuctionMessage.class);
+    REQUEST_LIVE_AUCTIONS(RequestLiveAuctionMessage.class),
+    REQUEST_PAYMENT(RequestPaymentMessage.class);
 
     private final Class<? extends MessageData> typeClass;
 }

@@ -6,6 +6,7 @@ import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.messages.types.AuctionMessage;
 import ssd.assignment.communication.messages.types.BidMessage;
 import ssd.assignment.communication.messages.types.RequestLiveAuctionMessage;
+import ssd.assignment.communication.messages.types.RequestPaymentMessage;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -94,15 +95,14 @@ public class AuctionManager {
         }
     }
 
-    /*public Auction getLiveAuction(String ItemID){
-        LiveAuction liveAuction=LiveAuctions.get(ItemID);
-        if(liveAuction.auction!=null) return liveAuction.getAuction();
-        else return null;
-    }*/
-
     public LiveAuction getLiveAuction(String ItemID){
         LiveAuction liveAuction = liveAuctions.get(ItemID);
         if(liveAuction.getAuction() != null) return liveAuction;
         else return null;
+    }
+
+    public void endLiveAuction(LiveAuction liveAuction) {
+        Bid highestBid = liveAuction.getLastBid();
+        DecentAuctionLedger.getMessageManager().publishMessage(new RequestPaymentMessage(highestBid));
     }
 }

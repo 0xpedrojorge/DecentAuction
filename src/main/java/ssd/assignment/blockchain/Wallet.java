@@ -95,6 +95,7 @@ public class Wallet {
             DecentAuctionLedger.getBlockchain().getUTXOs().remove(i.UTXO.id);
         }
 
+        DecentAuctionLedger.getBlockchain().getTransactionPool().addTransaction(newTransaction);
         TransactionMessage transactionMessage = new TransactionMessage(newTransaction);
         DecentAuctionLedger.getMessageManager().publishMessage(transactionMessage);
 

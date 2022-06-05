@@ -32,6 +32,8 @@ public class DecentAuctionLedger {
     public static AuctionManager auctionManager;
     @Getter
     private static MessageManager messageManager;
+    @Getter
+    private static Wallet wallet;
 
     public DecentAuctionLedger(String[] args) {
         if (args.length == 0) {
@@ -141,7 +143,7 @@ public class DecentAuctionLedger {
 
     private void startLocalAuctionsDemo(int portDelta){
 
-        Wallet wallet =  new Wallet();
+        wallet =  new Wallet();
 
         if (portDelta == 0) {
 
