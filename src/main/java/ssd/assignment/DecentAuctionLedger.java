@@ -4,7 +4,6 @@ import lombok.Getter;
 import ssd.assignment.auctions.Auction;
 import ssd.assignment.auctions.AuctionManager;
 import ssd.assignment.auctions.Client;
-import ssd.assignment.auctions.LiveAuctions;
 import ssd.assignment.blockchain.Wallet;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
@@ -30,22 +29,22 @@ public class DecentAuctionLedger {
     @Getter
     private static NetworkNode networkNode;
     @Getter
-    private static AuctionManager auctionManager;
+    public static AuctionManager auctionManager;
     @Getter
     private static MessageManager messageManager;
 
     public DecentAuctionLedger(String[] args) {
-        if (args.length == 0) {
+        /*if (args.length == 0) {
             System.out.println("Arguments not found");
             return;
         }
 
         startNetwork(Integer.parseInt(args[0]));
-        startBlockchain();
+        startBlockchain();*/
         startAuctionManager();
-        startMessageManager();
+        //startMessageManager();
 
-        //startLocalAuctions();
+        startLocalAuctions();
         //testTransactionsAndBlockBroadcast(args[0]);
     }
 
@@ -96,6 +95,8 @@ public class DecentAuctionLedger {
 
     private void startAuctionManager() {
         auctionManager = new AuctionManager();
+        System.out.println("Started AuctionManager");
+        auctionManager.run();
     }
 
     private void simulateFewTransactions() {
@@ -140,7 +141,7 @@ public class DecentAuctionLedger {
     }
 
     private void startLocalAuctions(){
-        LiveAuctions liveAuctions = new LiveAuctions();
+        /*LiveAuctions liveAuctions = new LiveAuctions();
 
         Wallet wallet =  new Wallet();
 
@@ -148,7 +149,7 @@ public class DecentAuctionLedger {
         Auction auction2 = new Auction(wallet,"laranja", "Quim", 1L, 0.5F, (long) 0.1, 1);
 
         liveAuctions.addAuction(auction);
-        liveAuctions.addAuction(auction2);
+        liveAuctions.addAuction(auction2);*/
 
         Runnable run = new Client();
         run.run();

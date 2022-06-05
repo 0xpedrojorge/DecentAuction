@@ -30,6 +30,7 @@ public class DecentAuctionServer {
         serverImpl = new NetworkServerImpl(localNode);
         server = ServerBuilder.forPort(port)
                 .addService(serverImpl)
+                //.addService()
                 .build()
                 .start();
         logger.info("Server started, listening on " + port);

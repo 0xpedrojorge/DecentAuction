@@ -104,6 +104,7 @@ public class MessageManager {
                 break;
             }
             case REQUEST_LIVE_AUCTIONS: {
+                System.out.println("Request for Auctions in the Network");
                 //TODO send auctions
                 auctionManager.sendAuctionsTo(sendingContact);
                 break;

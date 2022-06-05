@@ -20,7 +20,7 @@ public class Bid {
     private String Hash;
     //private byte[]  Signature;
 
-    public Bid(String itemId, String sellerId, String buyerID, long amount, long fee, PublicKey buyerPublicKey, String hash, byte[] signature) {
+    public Bid(String itemId, String sellerId, String buyerID, long amount, PublicKey buyerPublicKey, String hash) {
         ItemId = itemId;
         SellerId = sellerId;
         BuyerID = buyerID;
