@@ -31,6 +31,8 @@ public class MiningManager {
 
     private void handleNewTransactionInPool(int nTransactions) {
         if (transactionPool.getPoolSize() >= Standards.MIN_TRANSACTIONS_PER_BLOCK && !this.working) {
+            stopMiner();
+
             System.out.println("Enough transactions in pool, starting to mine.");
             this.working = true;
 
@@ -39,14 +41,11 @@ public class MiningManager {
 
             Block newBlock;
             if (blockChain.getLatestBlock() == null) {
-                newBlock = new Block("0");
+                newBlock = new Block("0000000000000000000000000000000000000000000000000000000000000000");
             } else {
                 newBlock = new Block(blockChain.getLatestBlock().getHeader().hash);
             }
             newBlock.addTransactions(newTransactions);
-
-            stopMiner(); // just to make sure
-            working = true;
 
             miner = new Miner(this, newBlock);
             miner.start();
@@ -67,7 +66,6 @@ public class MiningManager {
         for (Consumer<Block> consumer : minedBlockConsumers) {
             consumer.accept(newBlock);
         }
-        stopMiner();
     }
 
 }
