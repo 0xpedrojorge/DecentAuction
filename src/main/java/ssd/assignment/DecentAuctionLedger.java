@@ -165,6 +165,7 @@ public class DecentAuctionLedger {
         }
 
         Runnable run = new Client();
+        Client.setClientWallet(wallet);
         run.run();
     }
 

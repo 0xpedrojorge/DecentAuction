@@ -6,6 +6,6 @@ public class BidComparator implements Comparator<Bid> {
 
     @Override
     public int compare(Bid bid1, Bid bid2){
-        return Long.compare(bid1.getAmount(), bid2.getAmount());
+        return Float.compare(bid1.getAmount(), bid2.getAmount());
     }
 }

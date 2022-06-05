@@ -15,24 +15,6 @@ public class Client implements Runnable {
 
     private static final Scanner stdin=new Scanner(System.in);
 
-    /*public static Bid bet(String ItemID, long Amount){
-        Auction auction = LiveAuctions.getLiveAuction(ItemID);
-
-        if(auction== null){
-            System.out.println(" Auction: "+ ItemID +" not found!");
-            return null;
-        }
-        Bid bid = new Bid(auction, wallet, Amount);
-
-        //  anunciar a Bid
-        /*if( true ) {
-
-        }
-
-
-        return bid;
-    }*/
-
     public static void newBid(LiveAuction liveauction){
 
         System.out.print(" \n Menu to Bid Item: "+ liveauction.auction.getItemID()+"\n");
@@ -46,28 +28,39 @@ public class Client implements Runnable {
         }
         System.out.println(" The Minimun increment Amount is: "+liveauction.auction.getMinIncrement());
         System.out.print(" Place your bid amount: ");
-        long newAmount = stdin.nextLong();
+        String aux = stdin.nextLine();
+        Float newAmount = Float.parseFloat(aux);
 
+        if(liveauction.getLastBid()!=null){
+            float currAmount=liveauction.getLastBid().getAmount();
+            float minIncrement= liveauction.auction.getMinIncrement();
+            float soma = currAmount+minIncrement;
 
-        float currAmount=(float) liveauction.getLastBid().getAmount();
-        float minIncrement= liveauction.auction.getMinIncrement();
-        float soma = currAmount+minIncrement;
+            System.out.print(" Min amount alowed: "+ soma);
+            while (newAmount<=(liveauction.getLastBid().getAmount()+liveauction.auction.getMinIncrement())){
+                System.out.println(" your Amount:"+liveauction.getLastBid().getAmount()+" is not enough, place a bigger amount: ");
+                aux = stdin.nextLine();
+                newAmount = Float.parseFloat(aux);
+            }
 
-        System.out.print(" Min amount alowed: "+ soma);
-
-        //TODO Fix!!!
-
-        /*while (newamount<=(liveauction.getLastBid().getAmount()+liveauction.auction.getMinIncrement())){
-            System.out.println(" your Amount:"+liveauction.getLastBid().getAmount()+" is not enough, place a bigger amount: ");
-            newamount = stdin.nextFloat();
+        }
+        else{
+            while (newAmount<=(liveauction.auction.getMinAmount()+liveauction.auction.getMinIncrement())){
+                System.out.print(" your Amount:"+newAmount+"€ is not enough, place a bigger amount: ");
+                aux = stdin.nextLine();
+                newAmount = Float.parseFloat(aux);
+            }
         }
 
+
+        Bid currentBid = new Bid(liveauction.auction.getItemID(),liveauction.auction.getSellerID(),wallet.walletOwner ,newAmount, wallet.publicKey, wallet.getPublicKeyHash());
+        auctionManager.addLocalBid(currentBid);
+
+        System.out.print(" Successfully Bided! ");
+
+        System.out.println(" Your Bid: "+currentBid.toString());
+        System.out.print(" Press Double enter to return to the menu. ");
         stdin.nextLine();
-        /*
-        Bid currentBid = new Bid(liveauction.auction.getItemID(),liveauction.auction.getSellerID(),wallet.walletOwner , (long) newamount, wallet.publicKey, wallet.getPublicKeyHash());
-        */
-        //TODO Place the bid im LiveAuctions
-        System.out.print(" Successfully Bid! ");
     }
 
     public static void setClientWallet(Wallet wallet){
@@ -76,7 +69,30 @@ public class Client implements Runnable {
 
 
     public void NewAuction(){
-        System.out.println(" Create New Auction! ");
+        System.out.println(" Create New Auction! \n");
+        System.out.print(" Insert Item Name: ");
+        String ItemID=stdin.nextLine();
+        System.out.print(" Minimun Amount: ");
+        String aux = stdin.nextLine();
+        Long minAmount=Long.parseLong(aux);
+        System.out.print(" Minimun Increment: ");
+        aux = stdin.nextLine();
+        Float minIncrement=Float.parseFloat(aux);
+        System.out.print(" Duration of the Auction (in min): ");
+        aux = stdin.nextLine();
+        Long timeout=Long.parseLong(aux);
+
+        Auction auction=new Auction(ItemID,wallet.walletOwner, minAmount, minIncrement,timeout, wallet.publicKey, wallet.getPublicKeyHash());
+
+        auctionManager.addLocalAuction(auction);
+
+        System.out.print(" Successfully Added a new Auction! ");
+
+        System.out.println(" Your Auction: "+auction.toString());
+
+        System.out.print(" Press Double enter to return to the menu. ");
+        stdin.nextLine();
+
     }
 
     public void JoinAuctions(){
@@ -118,40 +134,36 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        System.out.println(" \n\n Welcome to DecentAuctions! ");
-        System.out.println(" Please choose one of the following option: ");
+        while(true) {
+            System.out.println(" \n\n Welcome to DecentAuctions! ");
+            System.out.println(" Please choose one of the following option: ");
 
-        System.out.print(" 1) New Auctions\n 2) Participate in Auction\n 3) Print Publik Key\n 4) Exit!\n -> ");
-        int answer=stdin.nextInt();
+            System.out.print(" 1) New Auctions\n 2) Participate in Auction\n 3) Print Publik Key\n 4) Exit!\n -> ");
+            int answer = stdin.nextInt();
 
-        while(answer < 1 || answer>4){
-            System.out.print(" Invalid Option, try again: \n -> ");
-            answer=stdin.nextInt();
+            while (answer < 1 || answer > 4) {
+                System.out.print(" Invalid Option, try again: \n -> ");
+                answer = stdin.nextInt();
+            }
+
+            stdin.nextLine();
+
+            switch (answer) {
+                case 1:
+                    NewAuction();
+                    break;
+                case 2:
+                    JoinAuctions();
+                    break;
+                case 3:
+                    System.out.println("Wallet PulicKey: " + wallet.publicKey);
+                    break;
+                case 4:
+                    System.exit(0);
+                    break;
+                default:
+                    break;
+            }
         }
-
-        stdin.nextLine();
-
-        switch (answer){
-            case 1:
-                NewAuction();
-                break;
-            case 2:
-                JoinAuctions();
-                break;
-            case 3:
-                System.out.println("Wallet PulicKey: " + wallet.publicKey);
-                break;
-            case 4:
-                System.exit(0);
-                break;
-            default:
-                break;
-        }
-
-
-
-
-
-
     }
 }

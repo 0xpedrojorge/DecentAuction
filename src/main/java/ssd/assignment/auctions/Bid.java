@@ -15,11 +15,11 @@ public class Bid implements Serializable {
     private final String itemId;
     //private final String sellerId;
     private final String buyerId;
-    private final long amount;
+    private final float amount;
     private transient final PublicKey buyerPublicKey;
     private String bidHash;
 
-    public Bid(String itemId, String sellerId, String buyerId, long amount, PublicKey buyerPublicKey, String bidHash) {
+    public Bid(String itemId, String sellerId, String buyerId, float amount, PublicKey buyerPublicKey, String bidHash) {
         this.itemId = itemId;
         //this.sellerId = sellerId;
         this.buyerId = buyerId;
@@ -28,7 +28,7 @@ public class Bid implements Serializable {
         this.bidHash = bidHash;
     }
 
-    public Bid(Auction auction, Wallet buyer, long amount){
+    public Bid(Auction auction, Wallet buyer, float amount){
         this.itemId =auction.getItemID();
         //this.sellerId = auction.getSellerID();
         this.buyerId = buyer.walletOwner;

@@ -4,6 +4,7 @@ import lombok.Getter;
 import ssd.assignment.DecentAuctionLedger;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.messages.types.AuctionMessage;
+import ssd.assignment.communication.messages.types.BidMessage;
 import ssd.assignment.communication.messages.types.RequestLiveAuctionMessage;
 
 import java.util.HashMap;
@@ -53,6 +54,19 @@ public class AuctionManager {
         Always had the bid. Allows to save second highest, in case highest doesn't pay
          */
         liveAuctions.get(bid.getItemId()).put(bid);
+    }
+
+    public void addLocalBid(Bid bid){
+        addBid(bid);
+        BidMessage message = new BidMessage(bid);
+        DecentAuctionLedger.getMessageManager().publishMessage(message);
+    }
+
+    public void addLocalAuction(Auction auction){
+        LiveAuction liveAuction=new LiveAuction(auction);
+        addLiveAuction(liveAuction);
+        AuctionMessage message=new AuctionMessage(liveAuction);
+        DecentAuctionLedger.getMessageManager().publishMessage(message);
     }
 
     public TreeSet<Bid> getLiveAuctionBids(String LiveAuctionID){

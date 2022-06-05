@@ -33,8 +33,8 @@ public class DecentAuctionServer {
                 //.addService()
                 .build()
                 .start();
-        logger.info("Server started, listening on " + port);
-
+        //logger.info("Server started, listening on " + port); // commented for asthetics reasons (should log for registory in log file, if needed to serve as prove for forensic analises)
+        //System.err.println("Server started, listening on " + port);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             System.err.println("*** shutting down gRPC server since JVM is shutting down");
