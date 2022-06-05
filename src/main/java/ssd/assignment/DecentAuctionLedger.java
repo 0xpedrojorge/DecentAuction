@@ -46,8 +46,8 @@ public class DecentAuctionLedger {
         startAuctionManager();
         startMessageManager();
 
-        startLocalAuctionsDemo(Integer.parseInt(args[0]));
-        //testTransactionsAndBlockBroadcast(Integer.parseInt(args[0]));
+        //startLocalAuctionsDemo(Integer.parseInt(args[0]));
+        transactionsAndBlockBroadcastDemo(Integer.parseInt(args[0]));
     }
 
     private void startNetwork(int portDelta) {
@@ -57,8 +57,8 @@ public class DecentAuctionLedger {
             networkNode = new NetworkNode(null, Standards.DEFAULT_PORT + portDelta);
             KContact bootstrapNode =
                     new KContact(Utils.getLocalAddress(), Standards.DEFAULT_PORT, Standards.DEFAULT_NODE_ID, System.currentTimeMillis());
-            Thread thread = new Thread(() -> networkNode.bootstrap(bootstrapNode));
-            thread.start();
+            Thread bootstrapThread = new Thread(() -> networkNode.bootstrap(bootstrapNode));
+            bootstrapThread.start();
         }
         System.out.println("Started the network");
     }
@@ -89,6 +89,7 @@ public class DecentAuctionLedger {
     private void transactionsAndBlockBroadcastDemo(int portDelta) {
         if (portDelta == 1) {
             simulateFewTransactions();
+            System.out.println(blockchain.toPrettyString());
         } else if (portDelta == 0) {
             try {
                 TimeUnit.SECONDS.sleep(10);
@@ -100,36 +101,32 @@ public class DecentAuctionLedger {
     }
 
     private void simulateFewTransactions() {
-        //Create wallets:
-        Wallet walletA = new Wallet();
-        Wallet walletB = new Wallet();
+
         Wallet coinbase = new Wallet();
+        Wallet wallet1 = new Wallet();
+        Wallet wallet2 = new Wallet();
 
-        //create genesis transaction, which sends 100 NoobCoin to walletA:
-        Transaction genesisTransaction = new Transaction(coinbase.publicKey, walletA.publicKey, 100f, null);
-        genesisTransaction.generateSignature(coinbase.privateKey);
-        genesisTransaction.id = "0";
-        genesisTransaction.getOutputs().add(new TxOutput(genesisTransaction.reciepient, genesisTransaction.amount, genesisTransaction.id));
-        blockchain.getUTXOs().put(genesisTransaction.getOutputs().get(0).id, genesisTransaction.getOutputs().get(0));
-        blockchain.getTransactionPool().addTransaction(genesisTransaction);
+        Transaction coinbaseTransaction = new Transaction(coinbase.publicKey, wallet1.publicKey, 10f, null);
+        coinbaseTransaction.generateSignature(coinbase.privateKey);
+        coinbaseTransaction.id = "0000000000000000000000000000000000000000000000000000000000000000";
+        coinbaseTransaction.getOutputs().add(new TxOutput(coinbaseTransaction.reciepient, coinbaseTransaction.amount, coinbaseTransaction.id));
+        blockchain.getUTXOs().put(coinbaseTransaction.getOutputs().get(0).id, coinbaseTransaction.getOutputs().get(0));
+        blockchain.getTransactionPool().addTransaction(coinbaseTransaction);
 
-        System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-        System.out.println("\nWalletA is Attempting to send funds (40) to WalletB...");
+        System.out.println("Wallet1's balance is: " + wallet1.getBalance());
 
-        blockchain.getTransactionPool().addTransaction(walletA.createTransaction(walletB.publicKey, 40f));
-        System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-        System.out.println("WalletB's balance is: " + walletB.getBalance());
+        blockchain.getTransactionPool().addTransaction(wallet1.createTransaction(wallet2.publicKey, 5f));
+        System.out.println("Wallet1's has: " + wallet1.getBalance());
+        System.out.println("Wallet2's has: " + wallet2.getBalance());
 
-        System.out.println("\nWalletA Attempting to send more funds (1000) than it has...");
-        blockchain.getTransactionPool().addTransaction(walletA.createTransaction(walletB.publicKey, 1000f));
+        blockchain.getTransactionPool().addTransaction(wallet1.createTransaction(wallet2.publicKey, 2f));
+        System.out.println("Wallet1's has: " + wallet1.getBalance());
+        System.out.println("Wallet2's has: " + wallet2.getBalance());
+
+        blockchain.getTransactionPool().addTransaction(wallet1.createTransaction(wallet2.publicKey, 13f));
         System.out.println("Pending transactions: " + blockchain.getTransactionPool().getPoolSize());
-        System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-        System.out.println("WalletB's balance is: " + walletB.getBalance());
-
-        System.out.println("\nWalletB is Attempting to send funds (20) to WalletA...");
-        blockchain.getTransactionPool().addTransaction(walletA.createTransaction(walletB.publicKey, 20f));
-        System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-        System.out.println("WalletB's balance is: " + walletB.getBalance());
+        System.out.println("Wallet1's has: " + wallet1.getBalance());
+        System.out.println("Wallet2's ahs: " + wallet2.getBalance());
 
         try {
             TimeUnit.SECONDS.sleep(3);

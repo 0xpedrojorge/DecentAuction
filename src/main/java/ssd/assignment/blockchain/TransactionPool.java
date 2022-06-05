@@ -29,7 +29,9 @@ public class TransactionPool {
     public LinkedList<Transaction> getTransactions(int n) {
         LinkedList<Transaction> transactionsToRemove = new LinkedList<>();
         for (int i = 0; i < n && !pendingTransactions.isEmpty(); i++) {
-            transactionsToRemove.add(pendingTransactions.remove(0));
+            //if (pendingTransactions.get(0).validateTransaction()) {
+                transactionsToRemove.add(pendingTransactions.remove(0));
+            //}
         }
         return transactionsToRemove;
     }

@@ -2,8 +2,11 @@ package ssd.assignment.blockchain.transactions;
 
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
+import ssd.assignment.DecentAuctionLedger;
+import ssd.assignment.blockchain.blocks.Block;
 import ssd.assignment.util.Crypto;
 import ssd.assignment.util.CustomExclusionStrategy;
+import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
 import java.io.Serializable;
@@ -11,6 +14,7 @@ import java.lang.reflect.Modifier;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 @Getter
 public class Transaction implements Serializable {
@@ -40,6 +44,32 @@ public class Transaction implements Serializable {
     public boolean verifiySignature() {
         String data = Utils.getStringFromKey(sender) + Utils.getStringFromKey(reciepient) + amount;
         return Crypto.verifySignature(data, signature, sender);
+    }
+
+
+    public boolean validateTransaction() {
+        if(!this.verifiySignature()) {
+            return false;
+        }
+
+        if(this.getInputsAmount() != this.getOutputsAmount()) {
+            return false;
+        }
+
+        for(TxInput input : this.getInputs()) {
+            TxOutput tempOutput = DecentAuctionLedger.getBlockchain().getUTXOs().get(input.transactionOutputId);
+
+            if (tempOutput == null) {
+                return false;
+            }
+
+            if (input.unspentTransactionOutput.amount != tempOutput.amount) {
+                return false;
+            }
+
+            DecentAuctionLedger.getBlockchain().getUTXOs().remove(input.transactionOutputId);
+        }
+        return true;
     }
 
     public float getInputsAmount() {
