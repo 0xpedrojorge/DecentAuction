@@ -2,35 +2,35 @@ package ssd.assignment.auctions;
 
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.*;
 
 @Getter
-public class LiveAuction {
+public class LiveAuction implements Serializable {
 
-    Auction auction;
-    TreeSet<Bid> bids = new TreeSet<>();
+    protected final Auction auction;
+    protected TreeSet<Bid> bids = new TreeSet<>(new BidComparator());
 
     public LiveAuction(Auction auction) {
         this.auction = auction;
     }
 
     public Bid getLastBid(){
-        if(bids.isEmpty()) return null;
+        if (bids.isEmpty()) return null;
         else return bids.last();
     }
 
 
     public void printLiveAuction(){
-        System.out.println("LiveAuciton: "+auction.toString2());
+        System.out.println("LiveAuciton: " + auction.toSimplifiedString());
         Bid latestBid = this.getLastBid();
 
-        if(latestBid!=null){ System.out.println("Latest Bid has the value: " + latestBid.getAmount() );}
+        if(latestBid!=null){ System.out.println("Latest bid has the value: " + latestBid.getAmount() );}
         else{System.out.println("There are no Bids in place!");}
     }
 
     public void printLastBid(){
         Bid latestBid = bids.last();
-        //System.out.println("teste last bid: " + latestBid.toString() );
 
         if(latestBid!=null){ System.out.println("Latest Bid has the current Info: " + latestBid);}
         else{System.out.println("There are no Bids in place!");}
@@ -41,19 +41,8 @@ public class LiveAuction {
     }
 
     public void put(Bid bid) {
-        if(bid !=null){
+        if (bid !=null) {
             bids.add(bid);
         }
     }
-
-    static class compareBid implements Comparator<Bid>{
-        public int compare(Bid bid1, Bid bid2){
-            return Long.compare(bid1.getAmount(), bid2.getAmount());
-        }
-    }
-
-
-
-
-
 }

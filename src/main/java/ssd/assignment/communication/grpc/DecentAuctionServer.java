@@ -164,13 +164,18 @@ public class DecentAuctionServer {
             KContact sendingNode = buildOffProtoNode(req.getSendingNode());
             byte[] message = req.getMessage().toByteArray();
 
+            ProtoMessageResponse protoMessageResponse = ProtoMessageResponse.newBuilder()
+                            .setSendingNode(buildSelf())
+                            .build();
+
+            responseObserver.onNext(protoMessageResponse);
+            responseObserver.onCompleted();
+
             Context.current().fork().run(() -> {
                 for (BiConsumer<KContact, byte[]> messageConsumer : this.messageConsumers) {
                     messageConsumer.accept(sendingNode, message);
                 }
             });
-
-            responseObserver.onCompleted();
         }
 
         @Override

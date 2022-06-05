@@ -1,17 +1,17 @@
 package ssd.assignment.communication.messages.types;
 
 import lombok.Getter;
-import ssd.assignment.auctions.Auction;
+import ssd.assignment.auctions.LiveAuction;
 import ssd.assignment.communication.messages.MessageData;
 import ssd.assignment.communication.messages.MessageType;
 
 @Getter
 public class AuctionMessage extends MessageData {
 
-    private final Auction auction;
+    private final LiveAuction liveAuction;
 
-    public AuctionMessage(Auction auction) {
-        this.auction = auction;
+    public AuctionMessage(LiveAuction liveAuction) {
+        this.liveAuction = liveAuction;
     }
 
     @Override

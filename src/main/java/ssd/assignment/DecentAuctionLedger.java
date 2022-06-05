@@ -4,6 +4,7 @@ import lombok.Getter;
 import ssd.assignment.auctions.Auction;
 import ssd.assignment.auctions.AuctionManager;
 import ssd.assignment.auctions.Client;
+import ssd.assignment.auctions.LiveAuction;
 import ssd.assignment.blockchain.Wallet;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.miners.MiningManager;
@@ -12,7 +13,6 @@ import ssd.assignment.blockchain.transactions.TxOutput;
 import ssd.assignment.communication.NetworkNode;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.messages.MessageManager;
-import ssd.assignment.communication.messages.types.AuctionMessage;
 import ssd.assignment.communication.messages.types.BlockMessage;
 import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
@@ -34,18 +34,18 @@ public class DecentAuctionLedger {
     private static MessageManager messageManager;
 
     public DecentAuctionLedger(String[] args) {
-        /*if (args.length == 0) {
+        if (args.length == 0) {
             System.out.println("Arguments not found");
             return;
         }
 
         startNetwork(Integer.parseInt(args[0]));
-        startBlockchain();*/
+        startBlockchain();
         startAuctionManager();
-        //startMessageManager();
+        startMessageManager();
 
-        startLocalAuctions();
-        //testTransactionsAndBlockBroadcast(args[0]);
+        startLocalAuctionsDemo(Integer.parseInt(args[0]));
+        //testTransactionsAndBlockBroadcast(Integer.parseInt(args[0]));
     }
 
     private void startNetwork(int portDelta) {
@@ -79,10 +79,15 @@ public class DecentAuctionLedger {
         System.out.println("Started message manager");
     }
 
-    private void testTransactionsAndBlockBroadcast(String arg) {
-        if (arg.equals("1")) {
+    private void startAuctionManager() {
+        auctionManager = new AuctionManager();
+        System.out.println("Started AuctionManager");
+    }
+
+    private void transactionsAndBlockBroadcastDemo(int portDelta) {
+        if (portDelta == 1) {
             simulateFewTransactions();
-        } else if (arg.equals("0")) {
+        } else if (portDelta == 0) {
             try {
                 TimeUnit.SECONDS.sleep(10);
             } catch (InterruptedException e) {
@@ -91,12 +96,6 @@ public class DecentAuctionLedger {
             System.out.println(blockchain.toPrettyString());
             System.out.print("Is blockchain valid? " + blockchain.isValid());
         }
-    }
-
-    private void startAuctionManager() {
-        auctionManager = new AuctionManager();
-        System.out.println("Started AuctionManager");
-        auctionManager.run();
     }
 
     private void simulateFewTransactions() {
@@ -140,21 +139,33 @@ public class DecentAuctionLedger {
         System.out.print("Is blockchain valid? " + blockchain.isValid());
     }
 
-    private void startLocalAuctions(){
-        /*LiveAuctions liveAuctions = new LiveAuctions();
+    private void startLocalAuctionsDemo(int portDelta){
 
         Wallet wallet =  new Wallet();
 
-        Auction auction = new Auction(wallet,"banana", "José", 1L, 0.5F, (long) 0.1, 1);
-        Auction auction2 = new Auction(wallet,"laranja", "Quim", 1L, 0.5F, (long) 0.1, 1);
+        if (portDelta == 0) {
 
-        liveAuctions.addAuction(auction);
-        liveAuctions.addAuction(auction2);*/
+            Auction auction1 = new Auction(wallet,"banana", "José", 1L, 0.5F, 0, 1);
+            Auction auction2 = new Auction(wallet,"laranja", "Quim", 1L, 0.5F, 0, 1);
+            auctionManager.addLiveAuction(new LiveAuction(auction1));
+            auctionManager.addLiveAuction(new LiveAuction(auction2));
+
+            for(LiveAuction liveAuction: auctionManager.getLiveAuctions().values()){
+                liveAuction.printLiveAuction();
+            }
+
+        } else {
+            auctionManager.requestNetworkAuctions();
+            System.out.println("Requesting auctions to the network...");
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         Runnable run = new Client();
         run.run();
-
-
     }
 
     public static void main(String[] args) {

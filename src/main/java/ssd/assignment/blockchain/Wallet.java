@@ -14,8 +14,8 @@ import java.util.Map;
 
 public class Wallet {
 
-    public PrivateKey privateKey;
-    public PublicKey publicKey;
+    public transient PrivateKey privateKey;
+    public transient PublicKey publicKey;
     public String walletOwner;
 
     public HashMap<String, TxOutput> UTXOs = new HashMap<>();
@@ -95,7 +95,6 @@ public class Wallet {
             DecentAuctionLedger.getBlockchain().getUTXOs().remove(i.UTXO.id);
         }
 
-        //TODO broadcast transaction
         TransactionMessage transactionMessage = new TransactionMessage(newTransaction);
         DecentAuctionLedger.getMessageManager().publishMessage(transactionMessage);
 

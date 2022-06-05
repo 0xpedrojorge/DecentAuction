@@ -1,55 +1,52 @@
 package ssd.assignment.auctions;
 
+import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import ssd.assignment.blockchain.Wallet;
 
+import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.security.PublicKey;
 import java.util.logging.Logger;
 
 @Getter
-public class Bid {
+public class Bid implements Serializable {
 
-    private static final Logger logger = Logger.getLogger(Bid.class.getName());
+    private final String itemId;
+    //private final String sellerId;
+    private final String buyerId;
+    private final long amount;
+    private transient final PublicKey buyerPublicKey;
+    private String bidHash;
 
-    private final String ItemId;
-    private final String SellerId;
-    private String BuyerID;
-    private long Amount;
-    //private long Fee;
-    PublicKey BuyerPublicKey;
-    private String Hash;
-    //private byte[]  Signature;
-
-    public Bid(String itemId, String sellerId, String buyerID, long amount, PublicKey buyerPublicKey, String hash) {
-        ItemId = itemId;
-        SellerId = sellerId;
-        BuyerID = buyerID;
-        Amount = amount;
-        //Fee = fee;
-        BuyerPublicKey = buyerPublicKey;
-        Hash = hash;
-        //Signature = signature;
+    public Bid(String itemId, String sellerId, String buyerId, long amount, PublicKey buyerPublicKey, String bidHash) {
+        this.itemId = itemId;
+        //this.sellerId = sellerId;
+        this.buyerId = buyerId;
+        this.amount = amount;
+        this.buyerPublicKey = buyerPublicKey;
+        this.bidHash = bidHash;
     }
 
     public Bid(Auction auction, Wallet buyer, long amount){
-        ItemId=auction.getItemID();
-        SellerId = auction.getSellerID();
-        BuyerID = buyer.walletOwner;
-        Amount = amount;
-        //Fee = fee;
-        BuyerPublicKey = buyer.publicKey;
-        //Hash = hash;
-        //Signature = signature;
-
+        this.itemId =auction.getItemID();
+        //this.sellerId = auction.getSellerID();
+        this.buyerId = buyer.walletOwner;
+        this.amount = amount;
+        this.buyerPublicKey = buyer.publicKey;
     }
 
     @Override
     public String toString() {
+        return new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).create().toJson(this);
+    }
+
+    public String toSimplifiedString() {
         return "Bid{" +
-                "ItemId='" + ItemId + '\'' +
-                ", SellerId='" + SellerId + '\'' +
-                ", BuyerID='" + BuyerID + '\'' +
-                ", Amount=" + Amount +
+                "ItemId='" + itemId + '\'' +
+                //", SellerId='" + sellerId + '\'' +
+                ", BuyerID='" + buyerId + '\'' +
+                ", Amount=" + amount +
                 '}';
     }
 

@@ -1,31 +1,31 @@
 package ssd.assignment.auctions;
 
+import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import ssd.assignment.blockchain.Wallet;
 
+import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.security.PublicKey;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 @Getter
-public class Auction {
+public class Auction implements Serializable {
 
     /**
      * Entity to represent an Aucion
      * */
-
-    private static final Logger logger = Logger.getLogger(Auction.class.getName());
     private final String itemID;
-    private final String sellerID;
-    private long minAmount;
-    private float minIncrement;
-    private long fee;
-    private long timeout;
-    private final PublicKey sellerPublicKey;
-    private final String hash;
-    private final byte[] signature; // TODO Não vai ser preciso
 
-    public Auction(String itemID, String sellerID, long minAmount, float minIncrement, long fee, long timeout, PublicKey sellerPublicKey, String hash, byte[] signature) {
+    private final String sellerID;
+    private final long minAmount;
+    private final float minIncrement;
+    private final long fee;
+    private final long timeout;
+    private final transient PublicKey sellerPublicKey;
+    private final String hash;
+
+    public Auction(String itemID, String sellerID, long minAmount, float minIncrement, long fee, long timeout, PublicKey sellerPublicKey, String hash) {
         this.itemID = itemID;
         this.sellerID = sellerID;
         this.minAmount = minAmount;
@@ -34,10 +34,10 @@ public class Auction {
         this.timeout = timeout;
         this.sellerPublicKey = sellerPublicKey;
         this.hash = hash;
-        this.signature = signature;
     }
 
     public Auction(Wallet wallet ,String itemID, String sellerID, long minAmount, float minIncrement, long fee, long timeout) {
+
         this.itemID = itemID;
         this.sellerID = sellerID;
         this.minAmount = minAmount;
@@ -46,25 +46,14 @@ public class Auction {
         this.timeout = timeout;
         this.sellerPublicKey = wallet.publicKey;
         this.hash = wallet.getPublicKeyHash();
-        this.signature = new byte[160]; //TODO hash signature! Not needed
     }
 
     @Override
     public String toString() {
-        return "Auction{" +
-                "itemID='" + itemID + '\'' +
-                ", sellerID='" + sellerID + '\'' +
-                ", minAmount=" + minAmount +
-                ", minIncrement=" + minIncrement +
-                ", fee=" + fee +
-                ", timeout=" + timeout +
-                ", sellerPublicKey=" + sellerPublicKey +
-                ", hash='" + hash + '\'' +
-                ", signature=" + Arrays.toString(signature) +
-                '}';
+        return new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).create().toJson(this);
     }
 
-    public String toString2() {
+    public String toSimplifiedString() {
         return "Auction{" +
                 "itemID='" + itemID + '\'' +
                 ", sellerID='" + sellerID + '\'' +

@@ -1,12 +1,10 @@
 package ssd.assignment.auctions;
 
-import ssd.assignment.DecentAuctionLedger;
 import ssd.assignment.blockchain.Wallet;
 
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-import static javax.management.Query.not;
 import static ssd.assignment.DecentAuctionLedger.auctionManager;
 
 public class Client implements Runnable {
@@ -15,7 +13,7 @@ public class Client implements Runnable {
 
     static Wallet wallet;
 
-    private static Scanner stdin=new Scanner(System.in);
+    private static final Scanner stdin=new Scanner(System.in);
 
     /*public static Bid bet(String ItemID, long Amount){
         Auction auction = LiveAuctions.getLiveAuction(ItemID);
@@ -48,7 +46,8 @@ public class Client implements Runnable {
         }
         System.out.println(" The Minimun increment Amount is: "+liveauction.auction.getMinIncrement());
         System.out.print(" Place your bid amount: ");
-        long newamount = stdin.nextLong();
+        long newAmount = stdin.nextLong();
+
 
         float currAmount=(float) liveauction.getLastBid().getAmount();
         float minIncrement= liveauction.auction.getMinIncrement();
@@ -68,7 +67,7 @@ public class Client implements Runnable {
         Bid currentBid = new Bid(liveauction.auction.getItemID(),liveauction.auction.getSellerID(),wallet.walletOwner , (long) newamount, wallet.publicKey, wallet.getPublicKeyHash());
         */
         //TODO Place the bid im LiveAuctions
-        System.out.print(" Successfully Bided! ");
+        System.out.print(" Successfully Bid! ");
     }
 
     public static void setClientWallet(Wallet wallet){
@@ -140,7 +139,7 @@ public class Client implements Runnable {
                 JoinAuctions();
                 break;
             case 3:
-                System.out.println("Wallet PulicKey: "+wallet.publicKey);
+                System.out.println("Wallet PulicKey: " + wallet.publicKey);
                 break;
             case 4:
                 System.exit(0);

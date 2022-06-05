@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import ssd.assignment.auctions.Auction;
 import ssd.assignment.auctions.AuctionManager;
 import ssd.assignment.auctions.Bid;
+import ssd.assignment.auctions.LiveAuction;
 import ssd.assignment.blockchain.blocks.Block;
 import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.transactions.Transaction;
@@ -65,9 +66,6 @@ public class MessageManager {
     }
 
     public void receiveMessage(KContact sendingContact, byte[] message) {
-        //TODO deal with incoming messages
-        //String jsonMessage = new String(message);
-        //System.out.println("Received " + jsonMessage);
 
         Message parsedMessage = gson.fromJson(new String(message), Message.class);
 
@@ -90,22 +88,19 @@ public class MessageManager {
                 break;
             }
             case BROADCAST_AUCTION: {
-                Auction auction = ((AuctionMessage) parsedMessage.getData()).getAuction();
+                LiveAuction liveAuction =((AuctionMessage) parsedMessage.getData()).getLiveAuction();
                 System.out.println("Received an auction");
-                //TODO deal with incoming live auction
-                auctionManager.addLiveAuction(auction);
+                auctionManager.addLiveAuction(liveAuction);
                 break;
             }
             case BROADCAST_BID: {
                 Bid bid = ((BidMessage) parsedMessage.getData()).getBid();
                 System.out.println("Received a bid");
-                //TODO deal with incoming bid
                 auctionManager.addBid(bid);
                 break;
             }
             case REQUEST_LIVE_AUCTIONS: {
-                System.out.println("Request for Auctions in the Network");
-                //TODO send auctions
+                System.out.println("Request for Auctions in the network");
                 auctionManager.sendAuctionsTo(sendingContact);
                 break;
             }
