@@ -16,15 +16,15 @@ public class Bid implements Serializable, Comparable {
     private final String buyerId;
     private final float amount;
     private transient final PublicKey buyerPublicKey;
-    private String bidHash;
+    private String buyerPublicKeyHash;
 
-    public Bid(String itemId, String sellerId, String buyerId, float amount, PublicKey buyerPublicKey, String bidHash) {
+    public Bid(String itemId, String sellerId, String buyerId, float amount, PublicKey buyerPublicKey, String buyerPublicKeyHash) {
         this.itemId = itemId;
         //this.sellerId = sellerId;
         this.buyerId = buyerId;
         this.amount = amount;
         this.buyerPublicKey = buyerPublicKey;
-        this.bidHash = bidHash;
+        this.buyerPublicKeyHash = buyerPublicKeyHash;
     }
 
     public Bid(Auction auction, Wallet buyer, float amount){

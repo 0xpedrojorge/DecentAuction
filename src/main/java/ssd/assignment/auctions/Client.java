@@ -1,5 +1,6 @@
 package ssd.assignment.auctions;
 
+import ssd.assignment.DecentAuctionLedger;
 import ssd.assignment.blockchain.Wallet;
 
 import java.util.Scanner;
@@ -10,8 +11,6 @@ import static ssd.assignment.DecentAuctionLedger.auctionManager;
 public class Client implements Runnable {
 
     private static final Logger logger = Logger.getLogger(Client.class.getName());
-
-    private static Wallet wallet;
 
     private static final Scanner stdin = new Scanner(System.in);
 
@@ -51,7 +50,7 @@ public class Client implements Runnable {
                 newAmount = Float.parseFloat(aux);
             }
         }
-
+        Wallet wallet = DecentAuctionLedger.getWallet();
 
         Bid currentBid = new Bid(liveauction.auction.getItemID(),liveauction.auction.getSellerID(),wallet.walletOwner ,newAmount, wallet.publicKey, wallet.getPublicKeyHash());
         auctionManager.addLocalBid(currentBid);
@@ -62,11 +61,6 @@ public class Client implements Runnable {
         System.out.print(" Press Double enter to return to the menu. ");
         stdin.nextLine();
     }
-
-    public static void setClientWallet(Wallet wallet){
-        Client.wallet= wallet;
-    }
-
 
     public void NewAuction(){
         System.out.println(" Create New Auction! \n");
@@ -82,6 +76,7 @@ public class Client implements Runnable {
         aux = stdin.nextLine();
         long timeout=Long.parseLong(aux);
 
+        Wallet wallet = DecentAuctionLedger.getWallet();
         Auction auction = new Auction(ItemID, wallet.walletOwner, minAmount, minIncrement,timeout, wallet.publicKey, wallet.getPublicKeyHash());
 
         auctionManager.addLocalAuction(auction);
@@ -134,6 +129,7 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
+        Wallet wallet = DecentAuctionLedger.getWallet();
         System.out.println(" \n\n Welcome to DecentAuctions! ");
         System.out.print(" What is your sellerID?\n -> ");
         wallet.walletOwner=stdin.nextLine();

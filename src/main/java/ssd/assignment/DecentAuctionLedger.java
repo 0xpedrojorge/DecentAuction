@@ -142,7 +142,6 @@ public class DecentAuctionLedger {
     }
 
     private void startLocalAuctionsDemo(int portDelta){
-
         wallet =  new Wallet();
 
         if (portDelta == 0) {
@@ -156,6 +155,14 @@ public class DecentAuctionLedger {
                 liveAuction.printLiveAuction();
             }
 
+            try {
+                TimeUnit.SECONDS.sleep(30);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            auctionManager.endLiveAuction(auctionManager.getLiveAuction("banana"));
+
         } else {
             auctionManager.requestNetworkAuctions();
             System.out.println("Requesting auctions to the network...");
@@ -167,7 +174,6 @@ public class DecentAuctionLedger {
         }
 
         Runnable run = new Client();
-        Client.setClientWallet(wallet);
         run.run();
     }
 

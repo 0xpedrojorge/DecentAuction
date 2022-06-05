@@ -107,8 +107,8 @@ public class MessageManager {
             }
             case REQUEST_PAYMENT: {
                 System.out.println("A payment has been requested");
-                Bid bid = ((BidMessage) parsedMessage.getData()).getBid();
-                if (DecentAuctionLedger.getWallet().publicKey.equals(bid.getBuyerPublicKey())) {
+                Bid bid = ((RequestPaymentMessage) parsedMessage.getData()).getBid();
+                if (Crypto.hash(DecentAuctionLedger.getWallet().publicKey.toString()).equals(bid.getBuyerPublicKeyHash())) {
                     DecentAuctionLedger.getWallet().createTransaction(bid.getBuyerPublicKey(), bid.getAmount());
                 }
                 break;

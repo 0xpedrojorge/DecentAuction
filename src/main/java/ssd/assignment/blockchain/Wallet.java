@@ -97,6 +97,7 @@ public class Wallet {
 
         DecentAuctionLedger.getBlockchain().getTransactionPool().addTransaction(newTransaction);
         TransactionMessage transactionMessage = new TransactionMessage(newTransaction);
+        System.out.println("Got here!!!");
         DecentAuctionLedger.getMessageManager().publishMessage(transactionMessage);
 
         return newTransaction;
