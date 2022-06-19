@@ -6,7 +6,10 @@ import ssd.assignment.blockchain.blocks.BlockChain;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.util.Standards;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class MiningManager {
 
@@ -15,16 +18,21 @@ public class MiningManager {
     private Miner miner;
     private boolean working;
 
+    private final List<Consumer<Block>> minedBlockConsumers;
+
     public MiningManager(BlockChain blockchain) {
         this.blockChain = blockchain;
         this.transactionPool = blockchain.getTransactionPool();
         this.working = false;
 
         if (transactionPool != null) transactionPool.registerSubscriber(this::handleNewTransactionInPool);
+        minedBlockConsumers = new ArrayList<>();
     }
 
     private void handleNewTransactionInPool(int nTransactions) {
         if (transactionPool.getPoolSize() >= Standards.MIN_TRANSACTIONS_PER_BLOCK && !this.working) {
+            stopMiner();
+
             System.out.println("Enough transactions in pool, starting to mine.");
             this.working = true;
 
@@ -33,14 +41,11 @@ public class MiningManager {
 
             Block newBlock;
             if (blockChain.getLatestBlock() == null) {
-                newBlock = new Block("0");
+                newBlock = new Block("0000000000000000000000000000000000000000000000000000000000000000");
             } else {
                 newBlock = new Block(blockChain.getLatestBlock().getHeader().hash);
             }
             newBlock.addTransactions(newTransactions);
-
-            stopMiner(); // just to make sure
-            working = true;
 
             miner = new Miner(this, newBlock);
             miner.start();
@@ -52,9 +57,15 @@ public class MiningManager {
         working = false;
     }
 
+    public void registerBlockConsumer(Consumer<Block> consumer) {
+        minedBlockConsumers.add(consumer);
+    }
+
     protected void notifyMinedBlock(Block newBlock) {
         blockChain.addBlock(newBlock);
-        stopMiner();
+        for (Consumer<Block> consumer : minedBlockConsumers) {
+            consumer.accept(newBlock);
+        }
     }
 
 }

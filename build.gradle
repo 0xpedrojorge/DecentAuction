@@ -4,7 +4,10 @@
      id 'com.google.protobuf' version '0.8.18'
      // Generate IntelliJ IDEA's .idea & .iml project files
      id 'idea'
-}
+     // Used to compile with dependencies
+     id "com.github.johnrengelman.shadow" version "7.1.2"
+
+ }
 
 application {
     mainClass = 'ssd.assignment.DecentAuctionLedger'

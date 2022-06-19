@@ -1,17 +1,22 @@
 package ssd.assignment.communication;
 
 import lombok.Getter;
-import ssd.assignment.communication.grpc.DecentAuctionClientManager;
+import ssd.assignment.communication.grpc.DecentAuctionClient;
 import ssd.assignment.communication.grpc.DecentAuctionServer;
 import ssd.assignment.communication.kademlia.KContact;
 import ssd.assignment.communication.kademlia.KDistributedHashTable;
 import ssd.assignment.communication.kademlia.KRoutingTable;
 import ssd.assignment.communication.operations.LookupOperation;
+import ssd.assignment.util.Crypto;
+import ssd.assignment.util.Standards;
 import ssd.assignment.util.Utils;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Getter
 public class NetworkNode {
@@ -19,13 +24,21 @@ public class NetworkNode {
     private final KContact self;
 
     private final DecentAuctionServer server;
-    private final DecentAuctionClientManager clientManager;
+    private final DecentAuctionClient clientManager;
 
     private final KRoutingTable routingTable;
     private final KDistributedHashTable dht;
+    private final List<byte[]> seenMessages;
 
     public NetworkNode(byte[] nodeId, int port) {
+        String address = Utils.getLocalAddressAsString();
+        if (nodeId == null || !Arrays.equals(nodeId, Standards.DEFAULT_NODE_ID)) {
+            System.out.println("Trying to generate node id...");
+            nodeId = NetworkNode.generateNodeId(address, port);
+            System.out.println("Generated the following node id: " + Utils.toHexString(nodeId));
+        }
         this.self = new KContact(Utils.getLocalAddress(), port, nodeId, System.currentTimeMillis());
+
 
         server = new DecentAuctionServer();
         Thread serverBlockedThread = new Thread(() -> {
@@ -38,7 +51,7 @@ public class NetworkNode {
             }
         });
         serverBlockedThread.start();
-        this.clientManager = new DecentAuctionClientManager();
+        this.clientManager = new DecentAuctionClient();
 
         try {
             this.routingTable = new KRoutingTable(
@@ -49,6 +62,7 @@ public class NetworkNode {
         }
 
         this.dht = new KDistributedHashTable();
+        this.seenMessages = new ArrayList<>();
     }
 
     public void bootstrap(KContact contact) {
@@ -66,5 +80,29 @@ public class NetworkNode {
 
     public int getPort() {
         return self.getPort();
+    }
+
+    public boolean addToSeenMessages(byte[] messageId) {
+        for (byte[] m : seenMessages) {
+            if (Arrays.equals(m, messageId)) {
+                return false;
+            }
+        }
+        seenMessages.add(messageId);
+        return true;
+    }
+
+    public static byte[] generateNodeId(String address, int port) {
+        int nonce = 0;
+        String proof;
+
+        do {
+            nonce++;
+            proof = Crypto.hash(address + port + nonce);
+        } while (proof.substring( 0, 1).equals(Utils.getDifficultyString(1)));
+
+        byte[] generatedId = new byte[Standards.KADEMLIA_ID_BIT_SIZE / Byte.SIZE];
+        System.arraycopy(proof.getBytes(), 0, generatedId, 0, generatedId.length);
+        return generatedId;
     }
 }

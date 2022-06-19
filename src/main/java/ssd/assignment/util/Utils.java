@@ -36,11 +36,14 @@ public class Utils {
 
     public static String getMerkleRoot(ArrayList<Transaction> transactions) {
         int count = transactions.size();
+
         ArrayList<String> previousTreeLayer = new ArrayList<>();
         for(Transaction transaction : transactions) {
             previousTreeLayer.add(transaction.getId());
         }
+
         ArrayList<String> treeLayer = previousTreeLayer;
+
         while(count > 1) {
             treeLayer = new ArrayList<>();
             for(int i=1; i < previousTreeLayer.size(); i++) {

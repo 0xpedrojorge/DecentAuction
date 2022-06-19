@@ -4,6 +4,7 @@ import ssd.assignment.DecentAuctionLedger;
 import ssd.assignment.blockchain.transactions.Transaction;
 import ssd.assignment.blockchain.transactions.TxInput;
 import ssd.assignment.blockchain.transactions.TxOutput;
+import ssd.assignment.communication.messages.types.TransactionMessage;
 import ssd.assignment.util.Crypto;
 
 import java.security.*;
@@ -13,8 +14,9 @@ import java.util.Map;
 
 public class Wallet {
 
-    public PrivateKey privateKey;
-    public PublicKey publicKey;
+    public transient PrivateKey privateKey;
+    public transient PublicKey publicKey;
+    public String walletOwner;
 
     public HashMap<String, TxOutput> UTXOs = new HashMap<>();
 
@@ -73,7 +75,7 @@ public class Wallet {
 
         //gather transaction inputs (Make sure they are unspent):
         for(TxInput i : inputs) {
-            i.UTXO = DecentAuctionLedger.getBlockchain().getUTXOs().get(i.transactionOutputId);
+            i.unspentTransactionOutput = DecentAuctionLedger.getBlockchain().getUTXOs().get(i.transactionOutputId);
         }
 
         //generate transaction outputs:
@@ -89,11 +91,14 @@ public class Wallet {
 
         //remove transaction inputs from UTXO lists as spent:
         for(TxInput i : inputs) {
-            if(i.UTXO == null) continue;
-            DecentAuctionLedger.getBlockchain().getUTXOs().remove(i.UTXO.id);
+            if(i.unspentTransactionOutput == null) continue;
+            DecentAuctionLedger.getBlockchain().getUTXOs().remove(i.unspentTransactionOutput.id);
         }
 
-        //TODO broadcast transaction
+        DecentAuctionLedger.getBlockchain().getTransactionPool().addTransaction(newTransaction);
+        TransactionMessage transactionMessage = new TransactionMessage(newTransaction);
+        System.out.println("Got here!!!");
+        DecentAuctionLedger.getMessageManager().publishMessage(transactionMessage);
 
         return newTransaction;
     }

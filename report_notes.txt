@@ -8,3 +8,4 @@
     - casos de uso como exemplo
     - ter mais que um nó de bootstrap (resiliência)
     - Optimized Contact Accounting (replacement cache)
+    - Sybil attack protection through difficult nodeId creation

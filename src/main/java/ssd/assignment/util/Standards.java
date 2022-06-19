@@ -44,9 +44,19 @@ public class Standards {
     public static final int KADEMLIA_K = 20;
 
     /*
+    Sets the bit size ID
+     */
+    public static final int B = 160;
+
+    /*
     Sets the concurrency parameter for Kademlia
      */
     public static final int KADEMLIA_ALPHA = 3;
+
+    /*
+    Sets the max amount of nodes to broadcast to for each depth
+     */
+    public static final int KADEMLIA_MAX_BROADCAST_PER_DEPTH = 3;
 
     /*
     Sets the staleness limit for Kademlia
@@ -62,5 +72,15 @@ public class Standards {
     Sets the default node port
      */
     public static final int DEFAULT_PORT = 50050;
+
+    /*
+    Sets the maximun number os atempts to bootstrap a node
+    */
+    //public static final int BOOTSTAP_ATEMPTS = 5;
+
+    /*
+    Sets the default node id
+     */
+    public static final byte[] DEFAULT_NODE_ID = Utils.toByteArray("ThemOGNodeAndFriends");
 
 }

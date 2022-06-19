@@ -16,7 +16,6 @@ public class StoreOperation implements Operation {
 
 
     public StoreOperation(NetworkNode localNode, StoredData data) {
-        System.out.println("Here I started the store operation");
         this.localNode = localNode;
         this.data = data;
     }
